@@ -1,0 +1,11 @@
+<publishData>
+<publishProfile profileName="pro-pretorian-system - Web Deploy" publishMethod="MSDeploy" publishUrl="pro-pretorian-system.scm.azurewebsites.net:443" msdeploySite="pro-pretorian-system" userName="$pro-pretorian-system" userPWD="F21bvk85TSJwScjq35L0z3EJThgD9MHdR1rRgZWQhoqMLaXPL2ldQG3pttb4" destinationAppUrl="http://pro-pretorian-system.azurewebsites.net" SQLServerDBConnectionString="" mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="https://portal.azure.com" webSystem="WebSites">
+<databases />
+</publishProfile>
+<publishProfile profileName="pro-pretorian-system - FTP" publishMethod="FTP" publishUrl="ftps://waws-prod-am2-791.ftp.azurewebsites.windows.net/site/wwwroot" ftpPassiveMode="True" userName="pro-pretorian-system\$pro-pretorian-system" userPWD="F21bvk85TSJwScjq35L0z3EJThgD9MHdR1rRgZWQhoqMLaXPL2ldQG3pttb4" destinationAppUrl="http://pro-pretorian-system.azurewebsites.net" SQLServerDBConnectionString="" mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="https://portal.azure.com" webSystem="WebSites">
+<databases />
+</publishProfile>
+<publishProfile profileName="pro-pretorian-system - Zip Deploy" publishMethod="ZipDeploy" publishUrl="pro-pretorian-system.scm.azurewebsites.net:443" userName="$pro-pretorian-system" userPWD="F21bvk85TSJwScjq35L0z3EJThgD9MHdR1rRgZWQhoqMLaXPL2ldQG3pttb4" destinationAppUrl="http://pro-pretorian-system.azurewebsites.net" SQLServerDBConnectionString="" mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="https://portal.azure.com" webSystem="WebSites">
+<databases />
+</publishProfile
+></publishData>
