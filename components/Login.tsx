@@ -39,7 +39,7 @@ export default function Login() {
     const result = await login(value, device)
     setLoading(false)
     if (result.isAuth === true) {
-      router.push("/board")
+      router.push("/")
     } else {
       alert(result.message)
     }
@@ -57,7 +57,7 @@ export default function Login() {
         }}
         className="relative flex flex-col gap-4 items-center justify-center px-4"></motion.div>
       {buttonHover && <Meteors number={30} />}
-      <div className="mx-auto grid w-[350px] gap-6">
+      <div className="mx-auto grid w-[350px] gap-6 z-10">
         <div className="grid gap-2 text-center">
           <h1
             className={`text-3xl font-bold  bg-gradient-to-r from-blue-600 via-emerald-500 to-indigo-400 inline-block text-transparent bg-clip-text`}>

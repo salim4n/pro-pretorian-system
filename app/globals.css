@@ -76,6 +76,24 @@
   background: var(--gradient);
 }
 
+.btn-destructive-gradient {
+  background: linear-gradient(to top left, #ff416c, #ff4b2b);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+footer {
+  margin-top: auto;
+}
+
 @layer base {
   * {
     @apply border-border;

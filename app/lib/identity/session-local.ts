@@ -1,29 +1,29 @@
-import 'server-only'
+import "server-only"
 
-import { SignJWT, jwtVerify } from 'jose'
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
-import { SessionPayload, User } from './definition'
-import * as dotenv from 'dotenv'
+import { SignJWT, jwtVerify } from "jose"
+import { cookies } from "next/headers"
+import { redirect } from "next/navigation"
+import { SessionPayload, User } from "./definition"
+import * as dotenv from "dotenv"
 
 dotenv.config()
 
 const secretKey = process.env.AUTH_SECRET
-if (!secretKey) throw Error('AUTH_SECRET not found')
+if (!secretKey) throw Error("AUTH_SECRET not found")
 const key = new TextEncoder().encode(secretKey)
 
 export async function encrypt(payload: SessionPayload) {
   return new SignJWT(payload)
-    .setProtectedHeader({ alg: 'HS256' })
+    .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime('1hr')
+    .setExpirationTime("1hr")
     .sign(key)
 }
 
-export async function decrypt(session: string | undefined = '') {
+export async function decrypt(session: string | undefined = "") {
   try {
     const { payload } = await jwtVerify(session, key, {
-      algorithms: ['HS256'],
+      algorithms: ["HS256"],
     })
     return payload
   } catch (error) {
@@ -32,46 +32,44 @@ export async function decrypt(session: string | undefined = '') {
 }
 
 export async function createSession(user: User) {
-  const session = await encrypt(
-    {
-      userId: user.rowKey,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      device: user.device,
-      role: user.role,
-      name: user.name,
-      surname: user.surname,
-      chatid: user.chatid && user.chatid,
-      container: user.container && user.container,
-    }
-  )
+  const session = await encrypt({
+    userId: user.rowKey,
+    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    device: user.device,
+    role: user.role,
+    name: user.name,
+    surname: user.surname,
+    chatid: user.chatid && user.chatid,
+    container: user.container && user.container,
+  })
 
-  cookies().set('pretorian-session', session, {
+  cookies().set("pro-pretorian-session", session, {
     httpOnly: true,
     secure: true,
     expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-    sameSite: 'lax',
-    path: '/',
+    sameSite: "lax",
+    path: "/",
   })
 
-  redirect('/board')
+  redirect("/")
 }
 
 export async function verifySession() {
-  const cookie = cookies().get('pretorian-session')?.value
+  const cookie = cookies().get("pro-pretorian-session")?.value
   const session = await decrypt(cookie)
-  console.log('session', session) // Debug
+  console.log("session", session) // Debug
 
   if (!session?.userId) {
-    console.log('No userId in session')
-    redirect('/login')
+    console.log("No userId in session")
+    redirect("/login")
   }
 
-  return { 
+  return {
     isAuth: true,
     userId: session.userId,
     expiresAt: session.expiresAt,
     device: session.device,
-    role : session.role,
+    role: session.role,
     name: session.name,
     surname: session.surname,
     chatid: session.chatid,
@@ -80,7 +78,7 @@ export async function verifySession() {
 }
 
 export async function updateSession() {
-  const session = cookies().get('pretorian-session')?.value
+  const session = cookies().get("pretorian-session")?.value
   const payload = await decrypt(session)
 
   if (!session || !payload) {
@@ -88,26 +86,26 @@ export async function updateSession() {
   }
 
   const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-  cookies().set('pretorian-session', session, {
+  cookies().set("pretorian-session", session, {
     httpOnly: true,
     secure: true,
     expires: expires,
-    sameSite: 'lax',
-    path: '/',
+    sameSite: "lax",
+    path: "/",
   })
 }
 
 export function deleteSession() {
-  cookies().delete('pretorian-session')
-  redirect('/login')
+  cookies().delete("pretorian-session")
+  redirect("/login")
 }
 
-export function addChatIdToSession(){
-  const cookie = cookies().get('pretorian-session')?.value
+export function addChatIdToSession() {
+  const cookie = cookies().get("pretorian-session")?.value
   const session = decrypt(cookie)
 
   if (!session) {
-    redirect('/login')
+    redirect("/login")
   }
 
   return session

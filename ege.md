@@ -9,7 +9,7 @@ az appservice plan create \
   --is-linux \
   --sku F1
 
-  az webapp create \
+az webapp create \
   --resource-group rg-pro-pretorian \
   --plan sp-pro-pretorian-system \
   --name pro-pretorian-system \
@@ -17,7 +17,7 @@ az appservice plan create \
   --startup-file "node server.js"
 
 
-  az webapp deployment list-publishing-profiles \
+az webapp deployment list-publishing-profiles \
   --resource-group rg-pro-pretorian \
   --name pro-pretorian-system \
   --xml > publishProfile.xml

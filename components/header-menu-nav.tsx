@@ -14,8 +14,8 @@ export default function HeaderMenuNav() {
         variant="ghost"
         size="lg"
         className="w-full "
-        disabled={pathname === "/board"}
-        onClick={() => router.push("/board")}>
+        disabled={pathname === "/"}
+        onClick={() => router.push("/")}>
         Dashboard
       </Button>
       <Button

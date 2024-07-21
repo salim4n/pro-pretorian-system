@@ -1,9 +1,8 @@
 "use client"
-import { GlareCard } from "../ui/glare-card"
 
 export default function Footer() {
   return (
-    <footer className="sticky bg-background h-16 flex items-center justify-center">
+    <footer className="mt-auto bg-background h-16 flex items-center justify-center">
       <div className="flex items-center gap-4 text-center">
         <p>{new Date().getFullYear()} &copy; Pretorian System</p>
         <img

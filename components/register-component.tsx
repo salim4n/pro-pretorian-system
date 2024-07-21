@@ -14,15 +14,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { langageList } from "@/models/langage-list"
-import { useActionState, useState } from "react"
+import { useState } from "react"
 import { signup } from "@/app/lib/identity/auth"
 import { useToast } from "./ui/use-toast"
 import { useRouter } from "next/navigation"
@@ -92,7 +84,7 @@ export default function RegisterComponent() {
         color: "#10B981",
         duration: 5000,
       })
-      router.push("/board")
+      router.push("/")
     }
     setLoading(false)
   }

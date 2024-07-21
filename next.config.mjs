@@ -2,7 +2,7 @@
 const nextConfig = {
   output: "standalone",
   images: {
-    domains: ["praetorian111.blob.core.windows.net"],
+    domains: ["propretoriansolution.blob.core.windows.net"],
   },
 }
 

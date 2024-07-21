@@ -17,10 +17,11 @@ import { cookies } from "next/headers"
 import LoginButton from "../LoginButton"
 
 export default async function Header() {
-  const isAuth = cookies().get("pretorian-session") === undefined ? false : true
+  const isAuth =
+    cookies().get("pro-pretorian-session") === undefined ? false : true
 
   return (
-    <header className="sticky top-0 flex h-16 items-center justify-between gap-4 border-b bg-background mx-auto px-4 md:px-6 lg:px-8 z-20">
+    <header className="sticky top-0 flex h-16 items-center justify-between gap-4 border-b bg-background rounded-full mx-auto px-4 md:px-6 lg:px-8 z-20">
       <div className="flex items-center gap-4">
         <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
           {isAuth && <HeaderMenuNav />}
