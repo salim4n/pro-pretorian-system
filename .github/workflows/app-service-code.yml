@@ -1,0 +1,64 @@
+name: App Service Code
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  AZURE_WEBAPP_NAME: web-pretorian-system
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: npm install and npm run build
+        run: |
+          npm install --force
+          npm run build
+
+      - name: Copy static files
+        run: |
+          cp -R ./public ./.next/standalone/public
+          cp -R ./.next/static ./.next/standalone/.next/static
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: app
+          path: ./.next/standalone
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    environment:
+      name: production
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: app
+
+      - name: "Deploy to Azure Web App"
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          slot-name: "Production"
+          publish-profile: ${{ secrets.PUBLISH_PROFILE }}
+          package: .
+        env:
+            AUTH_SECRET: ${{ secrets.AUTH_SECRET }}

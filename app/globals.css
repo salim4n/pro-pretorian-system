@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/* Name: custom color palette
+   Author: Ilias Ism
+    URL: https://gradient.page */
+/* CSS: .bg-gradient { background: var(--gradient) } */
+:root {
+  --gradient: linear-gradient(to top left, #085078, #85d8ce);
+
+  --background: 214 99.35% 98.5%;
+  --foreground: 214 8.7% 1%;
+
+  --muted: 214 8.7% 92.5%;
+  --muted-foreground: 214 4.35% 42.5%;
+
+  --popover: 214 20.400000000000006% 92.5%;
+  --popover-foreground: 214 8.7% 1.25%;
+
+  --card: 214 20.400000000000006% 92.5%;
+  --card-foreground: 214 8.7% 1.25%;
+
+  --border: 214 13.7% 90%;
+  --input: 214 13.7% 90%;
+
+  --primary: 214 87% 25%;
+  --primary-foreground: 214 1.74% 92.5%;
+
+  --secondary: 214 4.35% 96.25%;
+  --secondary-foreground: 214 6.22% 12.5%;
+
+  --accent: 214 4.35% 96.25%;
+  --accent-foreground: 214 6.22% 12.5%;
+
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+
+  --ring: 214 87% 25%;
+
+  --radius: 0.5rem;
+}
+.dark {
+  --gradient: linear-gradient(to top left, #1488cc, #2b32b2);
+
+  --background: 215 53.3% 3.52%;
+  --foreground: 215 8.2% 97.2%;
+
+  --muted: 215 41% 13.2%;
+  --muted-foreground: 215 8.2% 54.4%;
+
+  --popover: 215 48.6% 5.72%;
+  --popover-foreground: 215 8.2% 97.2%;
+
+  --card: 215 48.6% 5.72%;
+  --card-foreground: 215 8.2% 97.2%;
+
+  --border: 215 41% 13.2%;
+  --input: 215 41% 13.2%;
+
+  --primary: 215 82% 44%;
+  --primary-foreground: 215 8.2% 97.2%;
+
+  --secondary: 215 41% 13.2%;
+  --secondary-foreground: 215 8.2% 97.2%;
+
+  --accent: 215 41% 13.2%;
+  --accent-foreground: 215 8.2% 97.2%;
+
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 215 8.2% 97.2%;
+
+  --ring: 215 82% 44%;
+}
+
+.bg-gradient {
+  background: var(--gradient);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

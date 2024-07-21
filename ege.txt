@@ -1,0 +1,19 @@
+az appservice plan create \
+  --resource-group rg-sass-pretorian \
+  --location westeurope \
+  --name sp-pretorian-system \
+  --is-linux \
+  --sku F1
+
+  az webapp create \
+  --resource-group rg-sass-pretorian \
+  --plan sp-pretorian-system \
+  --name web-pretorian-system \
+  --runtime "NODE:20-lts" \
+  --startup-file "node server.js"
+
+
+  az webapp deployment list-publishing-profiles \
+  --resource-group rg-sass-pretorian \
+  --name web-pretorian-system \
+  --xml > publishProfile.xml
