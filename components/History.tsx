@@ -121,59 +121,28 @@ export default function History({ user }: IProps) {
   }, [model, pictures])
 
   async function handleDeleteAllSelection() {
-    setLoading(true)
-    setIsDeleting(true)
-    await deletePictures(date.from, date.to, user.container)
-      .then(_res => {
-        setPictures([])
-        toast({
-          title: "Suppression des detections",
-          description: `Toutes les detections de la periode selectionnée ont été supprimées`,
-        })
-      })
-      .catch(error => {
-        setLoading(false)
-        toast({
-          title: "Erreur lors de la suppression des detections",
-          description: error.message,
-        })
-      })
-      .finally(() => {
-        setLoading(false)
-        setIsDeleting(false)
-      })
-  }
+    const confirmation = window.confirm(
+      "Vous êtes sur le point de supprimer toutes les détections de la période sélectionnée. Voulez-vous continuer ?"
+    )
 
-  const handleImageClick = (picture, canvasRef, model) => {
-    const img = new window.Image()
-    img.crossOrigin = "anonymous"
-    img.src = picture
-    img.onload = async () => {
-      const canvas = canvasRef.current
-      const context = canvas?.getContext("2d")
-      if (context) {
-        context.clearRect(0, 0, canvas.width, canvas.height)
-        context.drawImage(img, 0, 0, canvas.width, canvas.height)
-        const predictions = model && (await model.detect(canvas))
-        console.log(predictions)
-        predictions.forEach(prediction => {
-          const [x, y, width, height] = prediction.bbox
-          const text = `${prediction.class} (${Math.round(
-            prediction.score * 100
-          )}%)`
-          context.strokeStyle = `#${Math.floor(
-            Math.random() * 16777215
-          ).toString()}`
-          context.lineWidth = 3
-          context.font = "20px Arial"
-          context.fillStyle = `#${Math.floor(
-            Math.random() * 16777215
-          ).toString()}`
-          context.fillText(text, x, y)
-          context.rect(x, y, width, height)
-          context.stroke()
+    if (confirmation) {
+      setLoading(true)
+      setIsDeleting(true)
+      await deletePictures(date.from, date.to, user.container)
+        .then(_res => {
+          setPictures([])
+          toast({
+            title: "Suppression des détections",
+            description: `Toutes les détections de la période sélectionnée ont été supprimées`,
+          })
         })
-      }
+        .catch(error => {
+          setLoading(false)
+          toast({
+            title: "Erreur lors de la suppression des détections",
+            description: error.message,
+          })
+        })
     }
   }
 
@@ -323,13 +292,6 @@ export default function History({ user }: IProps) {
                     width={300}
                     height={300}
                     className="rounded-lg w-full cursor-pointer text-center transition duration-500"
-                    onClick={() =>
-                      handleImageClick(
-                        picture,
-                        canvasRefs.current[index],
-                        model
-                      )
-                    }
                   />
                 </BackgroundGradient>
                 <canvas

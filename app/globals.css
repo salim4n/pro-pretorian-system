@@ -5,13 +5,22 @@
    Author: Ilias Ism
     URL: https://gradient.page */
 /* CSS: .bg-gradient { background: var(--gradient) } */
+
 :root {
   --gradient: linear-gradient(to top left, #085078, #85d8ce);
 
+  --radial-gradient: radial-gradient(
+    ellipse 80% 80% at 50% -20%,
+    rgba(8, 80, 120, 0.3),
+    rgba(255, 255, 255, 0)
+  );
+
   --background: 214 99.35% 98.5%;
+
   --foreground: 214 8.7% 1%;
 
   --muted: 214 8.7% 92.5%;
+
   --muted-foreground: 214 4.35% 42.5%;
 
   --popover: 214 20.400000000000006% 92.5%;
@@ -42,7 +51,14 @@
 .dark {
   --gradient: linear-gradient(to top left, #1488cc, #2b32b2);
 
+  --radial-gradient: radial-gradient(
+    ellipse 80% 80% at 50% -20%,
+    rgba(120, 119, 198, 0.3),
+    rgba(255, 255, 255, 0)
+  );
+
   --background: 215 53.3% 3.52%;
+
   --foreground: 215 8.2% 97.2%;
 
   --muted: 215 41% 13.2%;
@@ -76,6 +92,10 @@
   background: var(--gradient);
 }
 
+.bg-radial-gradient {
+  background: var(--radial-gradient);
+}
+
 .btn-destructive-gradient {
   background: linear-gradient(to top left, #ff416c, #ff4b2b);
 }
@@ -99,6 +119,6 @@ footer {
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-radial-gradient text-foreground;
   }
 }

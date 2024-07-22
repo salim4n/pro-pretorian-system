@@ -26,6 +26,14 @@ export default function HeaderMenuNav() {
         onClick={() => router.push("/historique")}>
         Historique
       </Button>
+      <Button
+        variant="ghost"
+        size="lg"
+        className="w-full "
+        disabled={pathname === "/video-inference"}
+        onClick={() => router.push("/video-inference")}>
+        Video Inference
+      </Button>
     </>
   )
 }
