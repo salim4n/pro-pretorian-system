@@ -89,11 +89,11 @@ export default function History({ user }: IProps) {
   useEffect(() => {
     tf.setBackend("webgl")
     loadModel()
-  }, [])
+  }, [loadModel])
 
   useEffect(() => {
     fetchPicturesFromRange()
-  }, [date])
+  }, [date, fetchPicturesFromRange])
 
   useEffect(() => {
     console.log("Running drawImage useEffect with picture:", picture)
@@ -313,11 +313,12 @@ export default function History({ user }: IProps) {
         <CardContent>
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-8">
             {pictures.map((picture, index) => (
-              <Modal>
+              <Modal key={index}>
                 <ModalTrigger>
                   <BackgroundGradient>
                     <Image
                       src={picture}
+                      key={index}
                       alt={"Image de la detection"}
                       width={200}
                       height={200}

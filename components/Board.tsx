@@ -64,7 +64,7 @@ export default function Board({ user }) {
         setCameraChecked(videoDevices.map(() => true))
       })
       .then(() => runCocoSsd())
-  }, [])
+  }, [runObjectDetection])
 
   useEffect(() => {
     if (net) {
