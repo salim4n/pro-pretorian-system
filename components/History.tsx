@@ -20,7 +20,6 @@ import { Calendar } from "./ui/calendar"
 import Image from "next/image"
 import { UserView } from "@/app/lib/identity/definition"
 import { CardBody, CardContainer, CardItem } from "./ui/3d-card"
-import { Meteors } from "./ui/meteors"
 import { BackgroundGradient } from "./ui/background-gradient"
 
 interface IProps {
@@ -37,40 +36,36 @@ export default function History({ user }: IProps) {
     from: new Date(actualYear, actualMonth, 1),
     to: addDays(new Date(actualYear, actualMonth, 1), 6),
   })
-  const [model, setModel] = useState<ObjectDetection>(null)
+  const [model, setModel] = useState<ObjectDetection | null>(null)
   const [pictures, setPictures] = useState<string[]>([])
-  const [picture, setPicture] = useState<string>("")
   const [isDeleting, setIsDeleting] = useState<boolean>(false)
   const [isDownloading, setIsDownloading] = useState<boolean>(false)
   const [modelLoading, setModelLoading] = useState<boolean>(false)
-  const [buttonHover, setButtonHover] = useState(false)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const canvasRefs = useRef<HTMLCanvasElement[]>([])
 
   const loadModel = async () => {
     setLoading(true)
     setModelLoading(true)
-    await load()
-      .then(model => {
-        setModel(model)
-        toast({
-          title: "Modèle de reconnaissance chargé",
-          description:
-            "Vous pouvez maintenant lancer la reconnaissance en cliquant sur une image",
-        })
+    try {
+      const loadedModel = await load()
+      setModel(loadedModel)
+      toast({
+        title: "Modèle de reconnaissance chargé",
+        description:
+          "Vous pouvez maintenant lancer la reconnaissance en cliquant sur une image",
       })
-      .catch(_error => {
-        toast({
-          title: "Erreur lors du chargement du modèle de reconnaissance",
-          description: "Verifiez votre connexion internet et rechargez la page",
-        })
+    } catch (_error) {
+      toast({
+        title: "Erreur lors du chargement du modèle de reconnaissance",
+        description: "Vérifiez votre connexion internet et rechargez la page",
       })
-      .finally(() => {
-        setLoading(false)
-        setModelLoading(false)
-      })
+    } finally {
+      setLoading(false)
+      setModelLoading(false)
+    }
   }
 
-  async function fetchPicturesFromRange() {
+  const fetchPicturesFromRange = async () => {
     if (date && date.from && date.to) {
       const fromDateStr = date.from.toISOString()
       const toDateStr = date.to.toISOString()
@@ -87,6 +82,43 @@ export default function History({ user }: IProps) {
   useEffect(() => {
     fetchPicturesFromRange()
   }, [date])
+
+  useEffect(() => {
+    if (model && pictures.length > 0) {
+      pictures.forEach((picture, index) => {
+        const img = new window.Image()
+        img.crossOrigin = "anonymous"
+        img.src = picture
+        img.onload = () => {
+          const canvas = canvasRefs.current[index]
+          const context = canvas?.getContext("2d")
+          if (context) {
+            context.clearRect(0, 0, canvas.width, canvas.height)
+            context.drawImage(img, 0, 0, canvas.width, canvas.height)
+            model.detect(canvas).then(predictions => {
+              predictions.forEach(prediction => {
+                const [x, y, width, height] = prediction.bbox
+                const text = `${prediction.class} (${Math.round(
+                  prediction.score * 100
+                )}%)`
+                // easy to see colors we need
+                context.strokeStyle = "#FF0000"
+                // line width bold
+                context.lineWidth = 4
+                // font size and font family
+                context.font = "20px Arial"
+                // fill text color
+                context.fillStyle = "#FF0000"
+                context.fillText(text, x, y)
+                context.rect(x, y, width, height)
+                context.stroke()
+              })
+            })
+          }
+        }
+      })
+    }
+  }, [model, pictures])
 
   async function handleDeleteAllSelection() {
     setLoading(true)
@@ -112,37 +144,34 @@ export default function History({ user }: IProps) {
       })
   }
 
-  async function handleImageClick(picture) {
-    const img = document.createElement("img")
+  const handleImageClick = (picture, canvasRef, model) => {
+    const img = new window.Image()
     img.crossOrigin = "anonymous"
     img.src = picture
     img.onload = async () => {
       const canvas = canvasRef.current
-      console.log("canvas", canvas)
       const context = canvas?.getContext("2d")
-
       if (context) {
-        console.log("context", context)
+        context.clearRect(0, 0, canvas.width, canvas.height)
         context.drawImage(img, 0, 0, canvas.width, canvas.height)
-        console.log("img", img)
-        const detections = await model.detect(img)
-        detections.forEach(detection => {
-          context.beginPath()
-          context.rect(
-            detection.bbox[0],
-            detection.bbox[1],
-            detection.bbox[2],
-            detection.bbox[3]
-          )
-          context.lineWidth = 2
-          context.strokeStyle = "red"
-          context.fillStyle = "red"
+        const predictions = model && (await model.detect(canvas))
+        console.log(predictions)
+        predictions.forEach(prediction => {
+          const [x, y, width, height] = prediction.bbox
+          const text = `${prediction.class} (${Math.round(
+            prediction.score * 100
+          )}%)`
+          context.strokeStyle = `#${Math.floor(
+            Math.random() * 16777215
+          ).toString()}`
+          context.lineWidth = 3
+          context.font = "20px Arial"
+          context.fillStyle = `#${Math.floor(
+            Math.random() * 16777215
+          ).toString()}`
+          context.fillText(text, x, y)
+          context.rect(x, y, width, height)
           context.stroke()
-          context.fillText(
-            `${detection.class} - ${Math.round(detection.score * 100)}%`,
-            detection.bbox[0],
-            detection.bbox[1] > 10 ? detection.bbox[1] - 5 : 10
-          )
         })
       }
     }
@@ -193,13 +222,9 @@ export default function History({ user }: IProps) {
       </Card>
     </div>
   ) : (
-    <div
-      className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-8"
-      onMouseEnter={() => setButtonHover(true)}
-      onMouseLeave={() => setButtonHover(false)}>
-      {buttonHover && <Meteors number={30} />}
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-8">
       <CardContainer className="m-3 item-center text-center">
-        <CardBody className="bg-gradient relative group/card  dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.1] dark:bg-black dark:border-white/[0.2] border-black/[0.1] w-auto sm:w-[30rem] h-auto rounded-xl p-6 border  ">
+        <CardBody className="bg-gradient relative group/card dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.1] dark:bg-black dark:border-white/[0.2] border-black/[0.1] w-auto sm:w-[30rem] h-auto rounded-xl p-6 border">
           <CardItem translateZ="50" className="text-sm font-bold">
             <strong>Selectionnez une période</strong>
           </CardItem>
@@ -243,7 +268,7 @@ export default function History({ user }: IProps) {
         </CardBody>
       </CardContainer>
       <CardContainer className="m-3 item-center text-center">
-        <CardBody className="bg-gradient relative group/card  dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.1] dark:bg-black dark:border-white/[0.2] border-black/[0.1] w-auto sm:w-[30rem] h-auto rounded-xl p-6 border  ">
+        <CardBody className="bg-gradient relative group/card dark:hover:shadow-2xl dark:hover:shadow-emerald-500/[0.1] dark:bg-black dark:border-white/[0.2] border-black/[0.1] w-auto sm:w-[30rem] h-auto rounded-xl p-6 border">
           <CardItem translateZ="50" className="text-sm font-bold">
             <strong>
               {date?.from?.toLocaleDateString("fr-FR", {
@@ -276,32 +301,44 @@ export default function History({ user }: IProps) {
           </CardItem>
           <CardItem translateZ="50" className="text-sm font-bold">
             <Button
-              className=" w-full text-center mt-4 "
+              className=" w-full text-center mt-4"
               variant="destructive"
               disabled={pictures?.length === 0}
               onClick={handleDeleteAllSelection}>
               <LucideTrash2 className="mr-2 h-4 w-4" />
-              {`Supprimer toutes les detections de la periode selectionnée`}
+              {`Supprimer toutes les détections de la période sélectionnée`}
             </Button>
           </CardItem>
         </CardBody>
       </CardContainer>
-      <Card className="m-3 w-full lg:col-span-2 flex-grow bg-transparent border-none ">
+      <Card className="m-3 w-full lg:col-span-2 flex-grow bg-transparent border-none">
         <CardContent>
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-8">
             {pictures.map((picture, index) => (
-              <div key={index}>
+              <div key={index} className="relative">
                 <BackgroundGradient>
                   <Image
                     src={picture}
-                    alt={"Image de la detection"}
-                    width={200}
-                    height={200}
-                    className="rounded-lg w-full cursor-pointer group-hover/modal-btn:translate-x-40 text-center transition duration-500"
-                    onClick={() => handleImageClick(picture)}
+                    alt={"Image de la détection"}
+                    width={300}
+                    height={300}
+                    className="rounded-lg w-full cursor-pointer text-center transition duration-500"
+                    onClick={() =>
+                      handleImageClick(
+                        picture,
+                        canvasRefs.current[index],
+                        model
+                      )
+                    }
                   />
                 </BackgroundGradient>
-                <canvas ref={canvasRef} width={200} height={200} />
+                <canvas
+                  // @ts-ignore
+                  ref={el => (canvasRefs.current[index] = el!)}
+                  width={300}
+                  height={300}
+                  className="absolute top-0 left-0 rounded-lg w-full h-full cursor-pointer text-center transition duration-500 z-50"
+                />
               </div>
             ))}
           </div>
