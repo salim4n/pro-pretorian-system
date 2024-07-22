@@ -15,20 +15,13 @@ import { Badge } from "./ui/badge"
 import { cn } from "@/app/lib/utils"
 import { Button } from "./ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
-import { BotIcon, CalendarIcon, LucideTrash2 } from "lucide-react"
+import { CalendarIcon, LucideTrash2 } from "lucide-react"
 import { Calendar } from "./ui/calendar"
 import Image from "next/image"
 import { UserView } from "@/app/lib/identity/definition"
 import { CardBody, CardContainer, CardItem } from "./ui/3d-card"
 import { Meteors } from "./ui/meteors"
 import { BackgroundGradient } from "./ui/background-gradient"
-import {
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalTrigger,
-} from "./ui/animated-modal"
 
 interface IProps {
   user: UserView
@@ -51,7 +44,7 @@ export default function History({ user }: IProps) {
   const [isDownloading, setIsDownloading] = useState<boolean>(false)
   const [modelLoading, setModelLoading] = useState<boolean>(false)
   const [buttonHover, setButtonHover] = useState(false)
-  const imageRef = useRef(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
 
   const loadModel = async () => {
     setLoading(true)
@@ -89,63 +82,11 @@ export default function History({ user }: IProps) {
   useEffect(() => {
     tf.setBackend("webgl")
     loadModel()
-  }, [loadModel])
+  }, [])
 
   useEffect(() => {
     fetchPicturesFromRange()
-  }, [date, fetchPicturesFromRange])
-
-  useEffect(() => {
-    console.log("Running drawImage useEffect with picture:", picture)
-    if (imageRef.current && canvasRef.current) {
-      const context = canvasRef.current.getContext("2d")
-      context.drawImage(imageRef.current, 0, 0)
-    }
-  }, [picture])
-
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-
-  function handleCreateCanvas() {
-    const img = new window.Image()
-    img.crossOrigin = "anonymous"
-    img.src = picture
-    img.onload = async () => {
-      const canvas = canvasRef.current
-      const context = canvas?.getContext("2d")
-      if (context) {
-        console.log("canvas", canvas)
-        context.drawImage(img, 0, 0, canvas.width, canvas.height)
-        console.log("Image drawn on canvas")
-      } else console.error("Canvas not found")
-    }
-  }
-
-  async function handleRunDetection() {
-    const img = new window.Image()
-    img.crossOrigin = "anonymous"
-    img.src = picture
-    img.onload = async () => {
-      const canvas = canvasRef.current
-      const context = canvas?.getContext("2d")
-      if (context) {
-        context.drawImage(img, 0, 0, canvas.width, canvas.height)
-        const predictions = model && (await model.detect(canvas))
-        predictions.forEach(prediction => {
-          const [x, y, width, height] = prediction.bbox
-          const text = `${prediction.class} (${Math.round(
-            prediction.score * 100
-          )}%)`
-          context.strokeStyle = "tomato"
-          context.lineWidth = 2
-          context.font = "20px Arial"
-          context.fillStyle = "tomato"
-          context.fillText(text, x, y)
-          context.rect(x, y, width, height)
-          context.stroke()
-        })
-      }
-    }
-  }
+  }, [date])
 
   async function handleDeleteAllSelection() {
     setLoading(true)
@@ -169,6 +110,42 @@ export default function History({ user }: IProps) {
         setLoading(false)
         setIsDeleting(false)
       })
+  }
+
+  async function handleImageClick(picture) {
+    const img = document.createElement("img")
+    img.crossOrigin = "anonymous"
+    img.src = picture
+    img.onload = async () => {
+      const canvas = canvasRef.current
+      console.log("canvas", canvas)
+      const context = canvas?.getContext("2d")
+
+      if (context) {
+        console.log("context", context)
+        context.drawImage(img, 0, 0, canvas.width, canvas.height)
+        console.log("img", img)
+        const detections = await model.detect(img)
+        detections.forEach(detection => {
+          context.beginPath()
+          context.rect(
+            detection.bbox[0],
+            detection.bbox[1],
+            detection.bbox[2],
+            detection.bbox[3]
+          )
+          context.lineWidth = 2
+          context.strokeStyle = "red"
+          context.fillStyle = "red"
+          context.stroke()
+          context.fillText(
+            `${detection.class} - ${Math.round(detection.score * 100)}%`,
+            detection.bbox[0],
+            detection.bbox[1] > 10 ? detection.bbox[1] - 5 : 10
+          )
+        })
+      }
+    }
   }
 
   return loading ? (
@@ -309,59 +286,23 @@ export default function History({ user }: IProps) {
           </CardItem>
         </CardBody>
       </CardContainer>
-      <Card className="m-3 w-full lg:col-span-2 flex-grow ">
+      <Card className="m-3 w-full lg:col-span-2 flex-grow bg-transparent border-none ">
         <CardContent>
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-8">
             {pictures.map((picture, index) => (
-              <Modal key={index}>
-                <ModalTrigger>
-                  <BackgroundGradient>
-                    <Image
-                      src={picture}
-                      key={index}
-                      alt={"Image de la detection"}
-                      width={200}
-                      height={200}
-                      className="rounded-lg w-full cursor-pointer group-hover/modal-btn:translate-x-40 text-center transition duration-500"
-                      onClick={() => {
-                        setPicture(picture)
-                      }}
-                    />
-                  </BackgroundGradient>
-                </ModalTrigger>
-                <ModalBody className="max-w-full max-h-full">
-                  <ModalContent className="flex-row">
-                    <div className="flex justify-center">
-                      <Image
-                        width={200}
-                        height={200}
-                        alt={"Image de la detection"}
-                        ref={imageRef}
-                        src={picture}
-                        onLoad={() => {
-                          handleCreateCanvas()
-                        }}
-                        style={{ display: "none" }}
-                      />
-                      <canvas
-                        ref={canvasRef}
-                        width={640}
-                        height={480}
-                        className="max-w-full max-h-full rounded-lg z-20"
-                      />
-                    </div>
-                  </ModalContent>
-                  <ModalFooter className="gap-4">
-                    <button className="relative inline-flex h-12 overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50">
-                      <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
-                      <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full  px-3 py-1 text-sm font-medium text-white backdrop-blur-3xl">
-                        <BotIcon className="h-5 w-5 mr-2" />
-                        Lancer la reconnaissance
-                      </span>
-                    </button>
-                  </ModalFooter>
-                </ModalBody>
-              </Modal>
+              <div key={index}>
+                <BackgroundGradient>
+                  <Image
+                    src={picture}
+                    alt={"Image de la detection"}
+                    width={200}
+                    height={200}
+                    className="rounded-lg w-full cursor-pointer group-hover/modal-btn:translate-x-40 text-center transition duration-500"
+                    onClick={() => handleImageClick(picture)}
+                  />
+                </BackgroundGradient>
+                <canvas ref={canvasRef} width={200} height={200} />
+              </div>
             ))}
           </div>
         </CardContent>

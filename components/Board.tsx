@@ -64,7 +64,12 @@ export default function Board({ user }) {
         setCameraChecked(videoDevices.map(() => true))
       })
       .then(() => runCocoSsd())
-  }, [runObjectDetection])
+
+    return () => {
+      net?.dispose()
+      tf.disposeVariables()
+    }
+  }, [])
 
   useEffect(() => {
     if (net) {

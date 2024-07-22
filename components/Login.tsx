@@ -70,7 +70,7 @@ export default function Login() {
             className={`text-3xl font-bold  bg-gradient-to-r from-indigo-500 via-yellow-500 to-indigo-500 inline-block text-transparent bg-clip-text`}
           />{" "}
           <BlurIn
-            text="Conectez-vous pour continuer"
+            text="Connectez-vous pour continuer"
             balise="h3"
             className={`text-sm font-bold bg-gradient-to-r from-gray-500 via-gray-200 to-gray-500 inline-block text-transparent bg-clip-text`}
           />
