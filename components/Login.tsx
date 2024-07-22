@@ -22,6 +22,8 @@ import { AuroraBackground } from "./ui/aurora-background"
 import { motion } from "framer-motion"
 import { useTheme } from "next-themes"
 import { Meteors } from "./ui/meteors"
+import { TextGenerateEffect } from "./ui/text-generate-effect"
+import { BlurIn } from "./ui/text-blur"
 
 export default function Login() {
   const { theme } = useTheme()
@@ -57,15 +59,21 @@ export default function Login() {
         }}
         className="relative flex flex-col gap-4 items-center justify-center px-4"></motion.div>
       {buttonHover && <Meteors number={30} />}
-      <div className="mx-auto grid w-[350px] gap-6 z-10">
+      <div
+        className="mx-auto grid w-[350px] gap-6 z-10"
+        onMouseEnter={() => setButtonHover(true)}
+        onMouseLeave={() => setButtonHover(false)}>
         <div className="grid gap-2 text-center">
-          <h1
-            className={`text-3xl font-bold  bg-gradient-to-r from-blue-600 via-emerald-500 to-indigo-400 inline-block text-transparent bg-clip-text`}>
-            Pretorian System Security{" "}
-          </h1>
-          <p className="text-muted-foreground ">
-            Entrer votre email et mot de passe pour continuer
-          </p>
+          <BlurIn
+            text="Pretorian System Security"
+            balise="h1"
+            className={`text-3xl font-bold  bg-gradient-to-r from-indigo-500 via-yellow-500 to-indigo-500 inline-block text-transparent bg-clip-text`}
+          />{" "}
+          <BlurIn
+            text="Conectez-vous pour continuer"
+            balise="h3"
+            className={`text-sm font-bold bg-gradient-to-r from-gray-500 via-gray-200 to-gray-500 inline-block text-transparent bg-clip-text`}
+          />
         </div>
         <Form {...form}>
           <form
@@ -78,7 +86,7 @@ export default function Login() {
                 <FormItem>
                   <FormLabel
                     className={theme === "light" ? "text-black" : "text-white"}>
-                    Email
+                    <BlurIn text="Email" balise="span" className="text-sm" />
                   </FormLabel>
                   <FormControl>
                     <Input
@@ -102,7 +110,11 @@ export default function Login() {
                 <FormItem>
                   <FormLabel
                     className={theme === "light" ? "text-black" : "text-white"}>
-                    Mot de passe
+                    <BlurIn
+                      text="Mot de passe"
+                      balise="span"
+                      className="text-sm"
+                    />
                   </FormLabel>
                   <FormControl>
                     <Input
@@ -122,10 +134,12 @@ export default function Login() {
             <Button
               type="submit"
               disabled={loading}
-              onMouseEnter={() => setButtonHover(true)}
-              onMouseOut={() => setButtonHover(false)}
               className="w-full animate-shimmer bg-gradient">
-              {loading ? "Chargement..." : "Se connecter"}
+              <BlurIn
+                text={loading ? "Chargement..." : "Se connecter"}
+                balise="span"
+                className="text-sm"
+              />
             </Button>
           </form>
         </Form>
@@ -133,9 +147,9 @@ export default function Login() {
           className={`mt-4 text-center text-sm z-10 ${
             theme === "light" ? "text-black" : "text-white"
           }`}>
-          <span>Vous n'avez pas de compte ?</span>
+          <BlurIn text="Vous n'avez pas de compte ?" balise="span" />
           <Link href="/register" className="underline ml-1 border ">
-            S'inscrire
+            <BlurIn text="Inscrivez-vous" balise="span" className="text-sm" />
           </Link>
         </div>
       </div>

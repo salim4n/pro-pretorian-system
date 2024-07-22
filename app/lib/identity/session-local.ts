@@ -96,12 +96,12 @@ export async function updateSession() {
 }
 
 export function deleteSession() {
-  cookies().delete("pretorian-session")
+  cookies().delete("pro-pretorian-session")
   redirect("/login")
 }
 
 export function addChatIdToSession() {
-  const cookie = cookies().get("pretorian-session")?.value
+  const cookie = cookies().get("pro-pretorian-session")?.value
   const session = decrypt(cookie)
 
   if (!session) {

@@ -2,7 +2,7 @@
 
 import "@tensorflow/tfjs-backend-webgl"
 import * as tf from "@tensorflow/tfjs"
-import { Card, CardContent, CardDescription, CardHeader } from "./ui/card"
+import { Card, CardContent, CardHeader } from "./ui/card"
 import { Skeleton } from "./ui/skeleton"
 import { useEffect, useRef, useState } from "react"
 import { useToast } from "./ui/use-toast"
@@ -22,7 +22,6 @@ import { UserView } from "@/app/lib/identity/definition"
 import { CardBody, CardContainer, CardItem } from "./ui/3d-card"
 import { Meteors } from "./ui/meteors"
 import { BackgroundGradient } from "./ui/background-gradient"
-import { GlareCard } from "./ui/glare-card"
 import {
   Modal,
   ModalBody,
@@ -227,7 +226,6 @@ export default function History({ user }: IProps) {
           <CardItem translateZ="50" className="text-sm font-bold">
             <strong>Selectionnez une période</strong>
           </CardItem>
-
           <div className={cn("grid gap-2")}>
             <Popover>
               <PopoverTrigger asChild>
@@ -315,65 +313,54 @@ export default function History({ user }: IProps) {
         <CardContent>
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-8">
             {pictures.map((picture, index) => (
-              <Card
-                key={index}
-                className="flex flex-col items-center w-full border-transparent bg-transparent">
-                <CardHeader>
-                  <CardDescription>
-                    <Modal>
-                      <ModalTrigger>
-                        <BackgroundGradient className="rounded-lg  p-0.5 ">
-                          <Image
-                            src={picture}
-                            alt={"Image de la detection"}
-                            width={200}
-                            height={200}
-                            className="rounded-lg w-full cursor-pointer group-hover/modal-btn:translate-x-40 text-center transition duration-500"
-                            onClick={() => {
-                              setPicture(picture)
-                            }}
-                          />
-                          <div className="-translate-x-40 group-hover/modal-btn:translate-x-0 flex items-center justify-center absolute inset-0 transition duration-500 text-white z-20">
-                            ✈️
-                          </div>
-                        </BackgroundGradient>
-                      </ModalTrigger>
-                      <ModalBody className="max-w-full max-h-full">
-                        <ModalContent className="flex-row">
-                          <div className="flex justify-center">
-                            <Image
-                              width={200}
-                              height={200}
-                              alt={"Image de la detection"}
-                              ref={imageRef}
-                              src={picture}
-                              onLoad={() => {
-                                handleCreateCanvas()
-                              }}
-                              style={{ display: "none" }}
-                            />
-                            <canvas
-                              ref={canvasRef}
-                              width={640}
-                              height={480}
-                              className="max-w-full max-h-full rounded-lg z-20"
-                            />
-                          </div>
-                        </ModalContent>
-                        <ModalFooter className="gap-4">
-                          <button className="relative inline-flex h-12 overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50">
-                            <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
-                            <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full  px-3 py-1 text-sm font-medium text-white backdrop-blur-3xl">
-                              <BotIcon className="h-5 w-5 mr-2" />
-                              Lancer la reconnaissance
-                            </span>
-                          </button>
-                        </ModalFooter>
-                      </ModalBody>
-                    </Modal>
-                  </CardDescription>
-                </CardHeader>
-              </Card>
+              <Modal>
+                <ModalTrigger>
+                  <BackgroundGradient>
+                    <Image
+                      src={picture}
+                      alt={"Image de la detection"}
+                      width={200}
+                      height={200}
+                      className="rounded-lg w-full cursor-pointer group-hover/modal-btn:translate-x-40 text-center transition duration-500"
+                      onClick={() => {
+                        setPicture(picture)
+                      }}
+                    />
+                  </BackgroundGradient>
+                </ModalTrigger>
+                <ModalBody className="max-w-full max-h-full">
+                  <ModalContent className="flex-row">
+                    <div className="flex justify-center">
+                      <Image
+                        width={200}
+                        height={200}
+                        alt={"Image de la detection"}
+                        ref={imageRef}
+                        src={picture}
+                        onLoad={() => {
+                          handleCreateCanvas()
+                        }}
+                        style={{ display: "none" }}
+                      />
+                      <canvas
+                        ref={canvasRef}
+                        width={640}
+                        height={480}
+                        className="max-w-full max-h-full rounded-lg z-20"
+                      />
+                    </div>
+                  </ModalContent>
+                  <ModalFooter className="gap-4">
+                    <button className="relative inline-flex h-12 overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50">
+                      <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
+                      <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full  px-3 py-1 text-sm font-medium text-white backdrop-blur-3xl">
+                        <BotIcon className="h-5 w-5 mr-2" />
+                        Lancer la reconnaissance
+                      </span>
+                    </button>
+                  </ModalFooter>
+                </ModalBody>
+              </Modal>
             ))}
           </div>
         </CardContent>
