@@ -22,7 +22,6 @@ import { AuroraBackground } from "./ui/aurora-background"
 import { motion } from "framer-motion"
 import { useTheme } from "next-themes"
 import { Meteors } from "./ui/meteors"
-import { TextGenerateEffect } from "./ui/text-generate-effect"
 import { BlurIn } from "./ui/text-blur"
 
 export default function Login() {
@@ -65,7 +64,7 @@ export default function Login() {
         onMouseLeave={() => setButtonHover(false)}>
         <div className="grid gap-2 text-center">
           <BlurIn
-            text="Pretorian System Security"
+            text="Pro Pretorian System Solution  "
             balise="h1"
             className={`text-3xl font-bold  bg-gradient-to-r from-indigo-500 via-yellow-500 to-indigo-500 inline-block text-transparent bg-clip-text`}
           />{" "}

@@ -13,9 +13,9 @@ const fontSans = FontSans({
 })
 
 export const metadata: Metadata = {
-  title: "Pretorian - Security Solutions",
+  title: "Pro Pretorian - Computer Vision Solutions",
   description:
-    "Pretorian System is a security solutions company that provides Computer Vision to businesses and individuals.",
+    "Pro Pretorian System Solutions is a company that provides Computer Vision solutions for your home and business.",
 }
 
 export default function RootLayout({

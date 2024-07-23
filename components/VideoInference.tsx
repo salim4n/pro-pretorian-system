@@ -98,128 +98,137 @@ export default function VideoInference({ user }: IProps) {
   }
 
   return (
-    <div className="m-5 flex min-h-screen w-full flex-col bg-muted/40">
-      <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6"></header>
-      <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 lg:grid-cols-3 xl:grid-cols-3">
-        <div className="lg:col-span-2">
-          <Card className="overflow-hidden bg-background">
-            <CardHeader className="flex flex-row items-start bg-muted/50 ">
-              <div className="grid gap-0.5">
-                <CardTitle className="text-lg">Video Preview</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="relative w-full max-w-2xl overflow-hidden rounded-lg aspect-video">
-                <video ref={videoRef} className="w-full" controls>
-                  {videoSrc && <source src={videoSrc} type="video/mp4" />}
-                </video>
-                <canvas
-                  ref={canvasRef}
-                  className="absolute top-0 left-0 w-full h-full pointer-events-none"
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-        <div className="grid gap-4">
+    <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 lg:grid-cols-3 xl:grid-cols-3 m-10">
+      <div className="lg:col-span-2">
+        <Card className="overflow-hidden bg-background">
+          <CardHeader className="flex flex-row items-start bg-muted/50 ">
+            <div className="grid gap-0.5">
+              <CardTitle className="text-lg">Lecteur Vidéo</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="relative w-full max-w-2xl overflow-hidden rounded-lg aspect-video">
+              <video ref={videoRef} className="w-full" controls>
+                {videoSrc && <source src={videoSrc} type="video/mp4" />}
+              </video>
+              <canvas
+                ref={canvasRef}
+                className="absolute top-0 left-0 w-full h-full pointer-events-none"
+              />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+      <div className="grid gap-4">
+        <Card className="bg-background">
+          <CardHeader className="flex flex-row items-start bg-muted/50">
+            <div className="grid gap-0.5">
+              <CardTitle className="text-lg">Vidéo Sélection</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="grid gap-4">
+              <Input
+                type="file"
+                id="inputFile"
+                accept="video/*"
+                placeholder="Choose a video file"
+                onChange={handleFileChange}
+                className="cursor-pointer"
+              />
+              <Button
+                variant="outline"
+                onClick={handleCreateVideoWithBoundingBox}
+                disabled={!model || !videoSrc}
+                className="w-full">
+                Traiter la vidéo
+              </Button>
+              <Button
+                variant="destructive"
+                className="hover:bg-red-500"
+                onClick={() => {
+                  setVideoSrc(null)
+                  const inputFile = document.getElementById("inputFile")
+                  if (inputFile) {
+                    inputFile.setAttribute("value", "")
+                  }
+                  if (videoRef.current) {
+                    videoRef.current.load()
+                  }
+
+                  if (canvasRef.current) {
+                    const context = canvasRef.current.getContext("2d")
+                    if (context) {
+                      context.clearRect(
+                        0,
+                        0,
+                        canvasRef.current.width,
+                        canvasRef.current.height
+                      )
+                    }
+                  }
+                }}
+                disabled={!videoSrc}>
+                Vider le lecteur vidéo
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+        {loadModel ? (
           <Card className="bg-background">
             <CardHeader className="flex flex-row items-start bg-muted/50">
               <div className="grid gap-0.5">
-                <CardTitle className="text-lg">Upload Video</CardTitle>
+                <CardTitle className="text-lg">Loading Model</CardTitle>
               </div>
             </CardHeader>
             <CardContent className="p-6">
-              <div className="grid gap-4">
-                <Input
-                  type="file"
-                  accept="video/*"
-                  placeholder="Choose a video file"
-                  className="bg-background"
-                  onChange={handleFileChange}
-                />
-                <Button
-                  onClick={handleCreateVideoWithBoundingBox}
-                  disabled={!model || !videoSrc}>
-                  Traiter la vidéo
-                </Button>
+              <div className="w-full text-center flex justify-center items-center">
+                <Avatar className="w-24 h-24">
+                  <AvatarImage src="/icon.jpeg" />
+                  <AvatarFallback>PR</AvatarFallback>
+                </Avatar>
+                <Badge variant="default" className="mt-4">
+                  <strong className="ml-4">
+                    {loadModel && "Loading Object Detection Model"}
+                  </strong>
+                </Badge>
               </div>
             </CardContent>
           </Card>
-          {loadModel ? (
-            <Card className="bg-background">
-              <CardHeader className="flex flex-row items-start bg-muted/50">
-                <div className="grid gap-0.5">
-                  <CardTitle className="text-lg">Loading Model</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="w-full text-center flex justify-center items-center">
-                  <Avatar className="w-24 h-24">
-                    <AvatarImage src="/icon.jpeg" />
-                    <AvatarFallback>PR</AvatarFallback>
-                  </Avatar>
-                  <Badge variant="default" className="mt-4">
-                    <strong className="ml-4">
-                      {loadModel && "Loading Object Detection Model"}
-                    </strong>
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card>
-              <CardHeader className="flex flex-row items-start bg-muted/50">
-                <div className="grid gap-0.5">
-                  <CardTitle className="text-lg">Select Model</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="grid gap-4">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-between">
-                        <span>
-                          {model ? modelName : "Choisissez un modèle"}
-                        </span>
-                        <ChevronDownIcon className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      {Object.keys(ModelComputerVision).map((key, index) => (
-                        <DropdownMenuItem
-                          key={index}
-                          onClick={() =>
-                            setModelName(ModelComputerVision[key])
-                          }>
-                          {ModelComputerVision[key]}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
+        ) : (
           <Card>
             <CardHeader className="flex flex-row items-start bg-muted/50">
               <div className="grid gap-0.5">
-                <CardTitle className="text-lg">Actions</CardTitle>
+                <CardTitle className="text-lg">Modèle Sélection</CardTitle>
               </div>
             </CardHeader>
             <CardContent className="p-6">
               <div className="grid gap-4">
-                <Button disabled={!model || !videoSrc}>
-                  Download Processed Video
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-between">
+                      <span>{model ? modelName : "Choisissez un modèle"}</span>
+                      <ChevronDownIcon className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    {Object.keys(ModelComputerVision).map((key, index) => (
+                      <DropdownMenuItem
+                        key={index}
+                        onClick={() => setModelName(ModelComputerVision[key])}>
+                        {ModelComputerVision[key]}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </CardContent>
           </Card>
-        </div>
-      </main>
-    </div>
+        )}
+      </div>
+    </main>
   )
 }
 
