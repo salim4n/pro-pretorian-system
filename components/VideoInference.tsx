@@ -18,6 +18,9 @@ import { useEffect, useState, useRef } from "react"
 import { ModelComputerVision } from "@/models/model-list"
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import { Badge } from "./ui/badge"
+import { set } from "date-fns"
+import { cocossdVideoInference } from "@/app/lib/cocossd/detect"
+import { detectVideo } from "@/app/lib/yolov8n/detect"
 
 interface IProps {
   user: UserView
@@ -25,6 +28,11 @@ interface IProps {
 
 export default function VideoInference({ user }: IProps) {
   const [model, setModel] = useState<ObjectDetection | null>(null)
+  const [yolo, setYolo] = useState({
+    net: null,
+    inputShape: [1, 0, 0, 3],
+  }) // init model & input shape
+  const [loading, setLoading] = useState({ loading: true }) // loading state
   const [modelName, setModelName] = useState<string>("")
   const [loadModel, setLoadModel] = useState<boolean>(false)
   const [videoSrc, setVideoSrc] = useState<string | null>(null)
@@ -43,11 +51,42 @@ export default function VideoInference({ user }: IProps) {
   useEffect(() => {
     console.log("model", modelName)
     if (modelName === ModelComputerVision.COCO_SSD) {
+      yolo?.net?.dispose()
       setLoadModel(true)
       load()
         .then(loadedModel => setModel(loadedModel))
         .catch(err => console.error(err))
         .finally(() => setLoadModel(false))
+    }
+
+    if (modelName === ModelComputerVision.YOLOV8N) {
+      model?.dispose()
+      setLoadModel(true)
+      setModel(null)
+      tf.ready().then(async () => {
+        const yolov8 = await tf.loadGraphModel(
+          `https://huggingface.co/salim4n/yolov8n_web_model/resolve/main/model.json`,
+          {
+            onProgress: fractions => {
+              setLoading({ loading: true }) // set loading fractions
+              console.log(`Loading YOLOv8n: ${fractions * 100}%`)
+            },
+          }
+        ) // load model
+
+        // warming up model
+        const dummyInput = tf.ones(yolov8.inputs[0].shape)
+        const warmupResults = yolov8.execute(dummyInput)
+
+        setLoading({ loading: false })
+        setYolo({
+          net: yolov8,
+          inputShape: yolov8.inputs[0].shape,
+        }) // set model & input shape
+
+        tf.dispose([warmupResults, dummyInput]) // cleanup memory
+        setLoadModel(false)
+      })
     }
   }, [modelName])
 
@@ -60,40 +99,10 @@ export default function VideoInference({ user }: IProps) {
   }
 
   const handleCreateVideoWithBoundingBox = () => {
-    if (model && videoRef.current && canvasRef.current) {
-      const video = videoRef.current
-      const canvas = canvasRef.current
-      const context = canvas.getContext("2d")
-
-      canvas.width = video.videoWidth
-      canvas.height = video.videoHeight
-
-      const drawBoundingBoxes = async () => {
-        if (video.paused || video.ended) {
-          return
-        }
-        if (context) {
-          context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight)
-          const predictions = await model.detect(video)
-
-          predictions.forEach(prediction => {
-            const [x, y, width, height] = prediction.bbox
-            context.strokeStyle = "#00FFFF"
-            context.lineWidth = 2
-            context.strokeRect(x, y, width, height)
-            context.font = "16px sans-serif"
-            context.fillStyle = "#00FFFF"
-            context.fillText(
-              `${prediction.class} (${Math.round(prediction.score * 100)}%)`,
-              x,
-              y > 10 ? y - 5 : 10
-            )
-          })
-        }
-        requestAnimationFrame(drawBoundingBoxes)
-      }
-
-      video.addEventListener("play", drawBoundingBoxes)
+    if (modelName === ModelComputerVision.COCO_SSD) {
+      cocossdVideoInference(model, videoRef, canvasRef)
+    } else if (modelName === ModelComputerVision.YOLOV8N) {
+      detectVideo(videoRef.current, yolo, canvasRef)
     }
   }
 
@@ -139,7 +148,7 @@ export default function VideoInference({ user }: IProps) {
               <Button
                 variant="outline"
                 onClick={handleCreateVideoWithBoundingBox}
-                disabled={!model || !videoSrc}
+                disabled={!modelName || !videoSrc}
                 className="w-full">
                 Traiter la vidéo
               </Button>
@@ -209,7 +218,9 @@ export default function VideoInference({ user }: IProps) {
                     <Button
                       variant="outline"
                       className="w-full justify-between">
-                      <span>{model ? modelName : "Choisissez un modèle"}</span>
+                      <span>
+                        {modelName ? modelName : "Choisissez un modèle"}
+                      </span>
                       <ChevronDownIcon className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
