@@ -18,7 +18,7 @@ import { ModelComputerVision, ModelList, modelList } from "@/models/model-list"
 import { cocossdVideoInference } from "@/lib/cocossd/detect"
 import { detectVideo } from "@/lib/yolov8n/detect"
 import ModelLoader from "./model-loader"
-import { segmentVideo } from "@/lib/yolov8-seg/detect"
+import { segmentVideo } from "@/lib/yolov8n-seg/detect"
 
 interface IProps {
   user: UserView
@@ -145,7 +145,7 @@ export default function VideoInference({ user }: IProps) {
     } else if (modelName === ModelComputerVision.DETECTION) {
       detectVideo(videoRef.current, yolo, canvasRef)
     } else if (modelName === ModelComputerVision.SEGMENTATION) {
-      segmentVideo(videoRef.current, yoloSeg as any, canvasRef as any)
+      segmentVideo(videoRef.current, yoloSeg as any, canvasRef.current)
     }
   }
 
@@ -160,7 +160,7 @@ export default function VideoInference({ user }: IProps) {
           </CardHeader>
           <CardContent className="p-6">
             <div className="relative w-full max-w-2xl overflow-hidden rounded-lg aspect-video">
-              <video ref={videoRef} className="w-full" controls>
+              <video ref={videoRef} className="w-full" autoPlay controls>
                 {videoSrc && <source src={videoSrc} type="video/mp4" />}
               </video>
               <canvas

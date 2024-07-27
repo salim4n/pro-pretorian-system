@@ -1,4 +1,4 @@
-export const labels = [
+[
   "person",
   "bicycle",
   "car",
@@ -78,5 +78,5 @@ export const labels = [
   "scissors",
   "teddy bear",
   "hair drier",
-  "toothbrush",
+  "toothbrush"
 ]
