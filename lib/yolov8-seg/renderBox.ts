@@ -45,8 +45,8 @@ export const renderBoxes = (ctx, boxesToDraw) => {
 }
 
 export class Colors {
-  palette: string[]
-  n: number
+  palette: any
+  n: any
   // ultralytics color palette https://ultralytics.com/
   constructor() {
     this.palette = [

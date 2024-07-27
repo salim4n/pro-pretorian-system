@@ -1,7 +1,6 @@
 import * as tf from "@tensorflow/tfjs"
 import { renderBoxes, Colors } from "./renderBox"
 import { labels } from "./labels"
-import { type } from "os"
 
 const numClass = labels.length
 const colors = new Colors()
@@ -54,79 +53,47 @@ export const detectFrame = async (
   callback = () => {}
 ) => {
   const [modelHeight, modelWidth] = model.inputShape.slice(1, 3) // get model width and height
-  console.log(model.outputShape)
   const [modelSegHeight, modelSegWidth, modelSegChannel] =
-    model?.outputShape[1].slice(1) // get model segmentation output shape
+    model.outputShape[1].slice(1)
 
   tf.engine().startScope() // start scoping tf engine
 
   const [input, xRatio, yRatio] = preprocess(source, modelWidth, modelHeight) // do preprocessing
 
   const res = model.net.execute(input) // execute model
-  console.log("res", res[0].shape, res[1].shape)
-  console.table(res)
-
-  // Check the shape of res[0]
-  const res0Shape = res[0].shape
-  console.log("res[0] shape:", res0Shape)
-
-  let transRes
-  if (res0Shape.length === 4) {
-    transRes = tf.tidy(() => res[0].transpose([0, 2, 3, 1]).squeeze()) // Adjust permutation for rank 4
-  } else if (res0Shape.length === 3) {
-    transRes = tf.tidy(() => res[0].transpose([0, 2, 1]).squeeze()) // Original permutation for rank 3
-  } else {
-    throw new Error("Unexpected tensor shape for res[0]")
-  }
-
-  // Check the shape of res[1]
-  const res1Shape = res[1].shape
-  console.log("res[1] shape:", res1Shape)
-
-  let transSegMask
-  if (res1Shape.length === 4) {
-    transSegMask = tf.tidy(() => res[1].transpose([0, 3, 1, 2]).squeeze()) // Adjust permutation for rank 4
-  } else if (res1Shape.length === 3) {
-    transSegMask = tf.tidy(() => res[1].transpose([0, 2, 1]).squeeze()) // Adjust permutation for rank 3
-  } else {
-    throw new Error("Unexpected tensor shape for res[1]")
-  }
+  const transRes = tf.tidy(() => res[0].transpose([0, 2, 1]).squeeze()) // transpose main result
+  const transSegMask = tf.tidy(() => res[1].transpose([0, 3, 1, 2]).squeeze()) // transpose segmentation mask result
 
   const boxes = tf.tidy(() => {
     const w = transRes.slice([0, 2], [-1, 1])
     const h = transRes.slice([0, 3], [-1, 1])
-    const x1 = tf.sub(transRes.slice([0, 0], [-1, 1]), tf.div(w, 2)) // x1
-    const y1 = tf.sub(transRes.slice([0, 1], [-1, 1]), tf.div(h, 2)) // y1
+    const x1 = tf.sub(transRes.slice([0, 0], [-1, 1]), tf.div(w, 2)) //x1
+    const y1 = tf.sub(transRes.slice([0, 1], [-1, 1]), tf.div(h, 2)) //y1
     return tf
       .concat(
         [
           y1,
           x1,
-          tf.add(y1, h), // y2
-          tf.add(x1, w), // x2
+          tf.add(y1, h), //y2
+          tf.add(x1, w), //x2
         ],
         1
-      )
-      .reshape([-1, 4]) // reshape to [numBoxes, 4]
-  })
+      ) // [y1, x1, y2, x2]
+      .squeeze() // [n, 4]
+  }) // get boxes [y1, x1, y2, x2]
 
-  // Ensure scores are 1D tensor
   const [scores, classes] = tf.tidy(() => {
-    const shape = transRes.shape
-    const numClass = shape[1] - 4 // adjust numClass based on the shape of the tensor
-    const rawScores = transRes.slice([0, 4], [-1, numClass]).reshape([-1])
-    return [rawScores.max(), rawScores.argMax()]
-  }) as [tf.Tensor1D, tf.Tensor1D]
+    const rawScores = transRes.slice([0, 4], [-1, numClass]).squeeze() // [n, 1]
+    return [rawScores.max(1), rawScores.argMax(1)]
+  }) // get scores and classes
 
-  // Perform non-max suppression
   const nms = await tf.image.nonMaxSuppressionAsync(
     boxes as any,
-    scores as any,
+    scores,
     500,
     0.45,
     0.2
-  )
-
+  ) // do nms to filter boxes
   const detReady = tf.tidy(() =>
     tf.concat(
       [
@@ -137,7 +104,6 @@ export const detectFrame = async (
       1 // axis
     )
   ) // indexing selected boxes, scores and classes from NMS result
-
   const masks = tf.tidy(() => {
     const sliced = transRes
       .slice([0, 4 + numClass], [-1, modelSegChannel])
@@ -153,7 +119,7 @@ export const detectFrame = async (
 
   for (let i = 0; i < detReady.shape[0]; i++) {
     const rowData = detReady.slice([i, 0], [1, 6]) // get every first 6 element from every row
-    const [y1, x1, y2, x2, score, label] = Array.from(rowData.dataSync()) // [y1, x1, y2, x2, score, label]
+    let [y1, x1, y2, x2, score, label] = rowData.dataSync() // [y1, x1, y2, x2, score, label]
     const color = colors.get(label) // get label color
 
     const downSampleBox = [
@@ -185,8 +151,8 @@ export const detectFrame = async (
             ? downSampleBox[3]
             : modelSegWidth - downSampleBox[1],
         ]
-      )
-      return sliced.reshape([sliced.shape[1], sliced.shape[2], 1]) // slicing mask to boxes and reshape to [h, w, 1]
+      ) // coordinate to slice mask from proto
+      return sliced.squeeze().expandDims(-1) // sliced proto [h, w, 1]
     })
     const upsampleProto = tf.image.resizeBilinear(proto, [
       upSampleBox[2],

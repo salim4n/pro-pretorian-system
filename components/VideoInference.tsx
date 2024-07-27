@@ -145,7 +145,7 @@ export default function VideoInference({ user }: IProps) {
     } else if (modelName === ModelComputerVision.DETECTION) {
       detectVideo(videoRef.current, yolo, canvasRef)
     } else if (modelName === ModelComputerVision.SEGMENTATION) {
-      segmentVideo(videoRef.current, yoloSeg, canvasRef)
+      segmentVideo(videoRef.current, yoloSeg as any, canvasRef as any)
     }
   }
 
