@@ -112,8 +112,8 @@ export const detectVideo = (vidSource, model, canvasRef) => {
    */
   const detectFrame = async () => {
     if (vidSource.videoWidth === 0 && vidSource.srcObject === null) {
-      const ctx = canvasRef.getContext("2d")
-      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height) // clean canvas
+      const ctx = canvasRef?.getContext("2d") // get canvas context
+      ctx?.clearRect(0, 0, ctx?.canvas.width, ctx?.canvas.height) // clean canvas
       return // handle if source is closed
     }
 

@@ -38,10 +38,10 @@ export const renderBoxes = (
     const score = (scores_data[i] * 100).toFixed(1)
 
     let [y1, x1, y2, x2] = boxes_data.slice(i * 4, (i + 1) * 4)
-    x1 *= ratios[0]
-    x2 *= ratios[0]
-    y1 *= ratios[1]
-    y2 *= ratios[1]
+    // x1 *= ratios[0]
+    // x2 *= ratios[0]
+    // y1 *= ratios[1]
+    // y2 *= ratios[1]
     const width = x2 - x1
     const height = y2 - y1
 

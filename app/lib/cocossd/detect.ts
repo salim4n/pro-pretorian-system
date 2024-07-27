@@ -20,6 +20,7 @@ export const cocossdVideoInference = async (
       if (context) {
         context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight)
         const predictions = await net.detect(video)
+        console.log(predictions)
         predictions.forEach(prediction => {
           const [x, y, width, height] = prediction.bbox
           context.strokeStyle = "#00FFFF"

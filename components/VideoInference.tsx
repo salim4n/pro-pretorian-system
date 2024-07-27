@@ -18,7 +18,6 @@ import { useEffect, useState, useRef } from "react"
 import { ModelComputerVision } from "@/models/model-list"
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import { Badge } from "./ui/badge"
-import { set } from "date-fns"
 import { cocossdVideoInference } from "@/app/lib/cocossd/detect"
 import { detectVideo } from "@/app/lib/yolov8n/detect"
 
@@ -27,12 +26,11 @@ interface IProps {
 }
 
 export default function VideoInference({ user }: IProps) {
-  const [model, setModel] = useState<ObjectDetection | null>(null)
+  const [coco, setCoco] = useState<ObjectDetection | null>(null)
   const [yolo, setYolo] = useState({
     net: null,
     inputShape: [1, 0, 0, 3],
   }) // init model & input shape
-  const [loading, setLoading] = useState({ loading: true }) // loading state
   const [modelName, setModelName] = useState<string>("")
   const [loadModel, setLoadModel] = useState<boolean>(false)
   const [videoSrc, setVideoSrc] = useState<string | null>(null)
@@ -49,45 +47,46 @@ export default function VideoInference({ user }: IProps) {
   }, [])
 
   useEffect(() => {
-    console.log("model", modelName)
-    if (modelName === ModelComputerVision.COCO_SSD) {
-      yolo?.net?.dispose()
-      setLoadModel(true)
-      load()
-        .then(loadedModel => setModel(loadedModel))
-        .catch(err => console.error(err))
-        .finally(() => setLoadModel(false))
-    }
+    tf.getBackend() !== "webgl" && tf.setBackend("webgl")
+    tf.ready().then(() => {
+      console.log("model", modelName)
+      if (modelName === ModelComputerVision.COCO_SSD) {
+        yolo?.net?.dispose()
+        setLoadModel(true)
+        load()
+          .then(loadedModel => setCoco(loadedModel))
+          .catch(err => console.error(err))
+          .finally(() => setLoadModel(false))
+      }
 
-    if (modelName === ModelComputerVision.YOLOV8N) {
-      model?.dispose()
-      setLoadModel(true)
-      setModel(null)
-      tf.ready().then(async () => {
-        const yolov8 = await tf.loadGraphModel(
-          `https://huggingface.co/salim4n/yolov8n_web_model/resolve/main/model.json`,
-          {
-            onProgress: fractions => {
-              setLoading({ loading: true }) // set loading fractions
-              console.log(`Loading YOLOv8n: ${fractions * 100}%`)
-            },
-          }
-        ) // load model
+      if (modelName === ModelComputerVision.YOLOV8N) {
+        coco?.dispose()
+        setLoadModel(true)
+        setCoco(null)
+        tf.ready().then(async () => {
+          const yolov8 = await tf.loadGraphModel(
+            `https://huggingface.co/salim4n/yolov8n_web_model/resolve/main/model.json`,
+            {
+              onProgress: fractions => {
+                console.log(`Loading YOLOv8n: ${fractions * 100}%`)
+              },
+            }
+          ) // load model
 
-        // warming up model
-        const dummyInput = tf.ones(yolov8.inputs[0].shape)
-        const warmupResults = yolov8.execute(dummyInput)
+          // warming up model
+          const dummyInput = tf.ones(yolov8.inputs[0].shape)
+          const warmupResults = yolov8.execute(dummyInput)
 
-        setLoading({ loading: false })
-        setYolo({
-          net: yolov8,
-          inputShape: yolov8.inputs[0].shape,
-        }) // set model & input shape
+          setYolo({
+            net: yolov8,
+            inputShape: yolov8.inputs[0].shape,
+          }) // set model & input shape
 
-        tf.dispose([warmupResults, dummyInput]) // cleanup memory
-        setLoadModel(false)
-      })
-    }
+          tf.dispose([warmupResults, dummyInput]) // cleanup memory
+          setLoadModel(false)
+        })
+      }
+    })
   }, [modelName])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,7 +99,7 @@ export default function VideoInference({ user }: IProps) {
 
   const handleCreateVideoWithBoundingBox = () => {
     if (modelName === ModelComputerVision.COCO_SSD) {
-      cocossdVideoInference(model, videoRef, canvasRef)
+      cocossdVideoInference(coco, videoRef, canvasRef)
     } else if (modelName === ModelComputerVision.YOLOV8N) {
       detectVideo(videoRef.current, yolo, canvasRef)
     }
