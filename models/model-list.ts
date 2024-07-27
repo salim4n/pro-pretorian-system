@@ -26,7 +26,7 @@ export const modelList: ModelList[] = [
   },
   {
     title: ModelComputerVision.SEGMENTATION,
-    url: "https://tfhub.dev/tensorflow/deeplabv3_mnv2_pascal/1/default/1",
+    url: "https://huggingface.co/salim4n/yolov8n-segment-web/resolve/main/model.json",
     description:
       "Semantic segmentation model that assigns a label to each pixel in the image.",
   },

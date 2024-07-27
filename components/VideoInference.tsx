@@ -12,26 +12,28 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
-
 import { UserView } from "@/lib/identity/definition"
 import { useEffect, useState, useRef } from "react"
 import { ModelComputerVision, ModelList, modelList } from "@/models/model-list"
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
-import { Badge } from "./ui/badge"
 import { cocossdVideoInference } from "@/lib/cocossd/detect"
 import { detectVideo } from "@/lib/yolov8n/detect"
 import ModelLoader from "./model-loader"
+import { segmentVideo } from "@/lib/yolov8-seg/detect"
 
 interface IProps {
   user: UserView
 }
 
 export default function VideoInference({ user }: IProps) {
-  const [coco, setCoco] = useState<ObjectDetection | null>(null)
+  const [coco, setCoco] = useState<ObjectDetection | null>(null) // init model of COCO SSD
   const [yolo, setYolo] = useState({
     net: null,
     inputShape: [1, 0, 0, 3],
-  }) // init model & input shape
+  }) // init model & input shape of YOLO DETECTION
+  const [yoloSeg, setYoloSeg] = useState({
+    net: null,
+    inputShape: [1, 0, 0, 3],
+  }) // init model & input shape of YOLO SEGMENTATION
   const [modelName, setModelName] = useState<string>("")
   const [loadModel, setLoadModel] = useState<boolean>(false)
   const [videoSrc, setVideoSrc] = useState<string | null>(null)
@@ -90,6 +92,42 @@ export default function VideoInference({ user }: IProps) {
           setLoadModel(false)
         })
       }
+      if (modelName === ModelComputerVision.SEGMENTATION) {
+        coco?.dispose()
+        yolo?.net?.dispose()
+        setLoadModel(true)
+        tf.ready().then(async () => {
+          const yolov8 = await tf.loadGraphModel(
+            modelList.find(
+              model => model.title === ModelComputerVision.SEGMENTATION
+            )?.url as string,
+            {
+              onProgress: fractions => {
+                setPercentLoaded(fractions * 100)
+              },
+            }
+          ) // load model
+
+          // warming up model
+          const dummyInput = tf.randomUniform(
+            yolov8.inputs[0].shape,
+            0,
+            1,
+            "float32"
+          ) // random input
+          const warmupResults = yolov8.execute(dummyInput)
+
+          setYoloSeg(prevState => ({
+            ...prevState,
+            net: yolov8,
+            inputShape: yolov8.inputs[0].shape,
+            outputShape: (warmupResults as any).map(e => e.shape),
+          })) // set model & input shape
+
+          tf.dispose([warmupResults, dummyInput]) // cleanup memory
+          setLoadModel(false)
+        })
+      }
     })
   }, [modelName])
 
@@ -106,6 +144,8 @@ export default function VideoInference({ user }: IProps) {
       cocossdVideoInference(coco, videoRef, canvasRef)
     } else if (modelName === ModelComputerVision.DETECTION) {
       detectVideo(videoRef.current, yolo, canvasRef)
+    } else if (modelName === ModelComputerVision.SEGMENTATION) {
+      segmentVideo(videoRef.current, yoloSeg, canvasRef)
     }
   }
 
