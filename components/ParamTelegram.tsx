@@ -1,13 +1,13 @@
 "use client"
 
-import { UserView } from "@/app/lib/identity/definition"
+import { UserView } from "@/lib/identity/definition"
 import Link from "next/link"
 import { useState } from "react"
 import { v4 as uuidv4 } from "uuid"
 import { Button } from "./ui/button"
-import { getChatId } from "@/app/lib/telegram-bot/action"
-import { addChatIdToUser } from "@/app/lib/azure-table/action"
-import { logout } from "@/app/lib/identity/auth"
+import { getChatId } from "@/lib/telegram-bot/action"
+import { addChatIdToUser } from "@/lib/azure-table/action"
+import { logout } from "@/lib/identity/auth"
 import { useRouter } from "next/navigation"
 
 interface ParamTelegramProps {

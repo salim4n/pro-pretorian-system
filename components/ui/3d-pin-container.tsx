@@ -1,7 +1,7 @@
 "use client"
 import React, { useState } from "react"
 import { motion } from "framer-motion"
-import { cn } from "@/app//lib/utils"
+import { cn } from "@/lib/utils"
 import Link from "next/link"
 
 export const PinContainer = ({

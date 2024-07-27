@@ -5,7 +5,7 @@ import Particles, { initParticlesEngine } from "@tsparticles/react"
 import type { Container, SingleOrMultiple } from "@tsparticles/engine"
 import { loadSlim } from "@tsparticles/slim"
 import { motion, useAnimation } from "framer-motion"
-import { cn } from "@/app/lib/utils"
+import { cn } from "@/lib/utils"
 
 type ParticlesProps = {
   id?: string

@@ -9,7 +9,7 @@ import {
 } from "@tensorflow-models/coco-ssd"
 import * as tf from "@tensorflow/tfjs"
 import Webcam from "react-webcam"
-import { Detected, sendPicture } from "@/app/lib/send-detection/action"
+import { Detected, sendPicture } from "@/lib/send-detection/action"
 import { Switch } from "@/components/ui/switch"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"

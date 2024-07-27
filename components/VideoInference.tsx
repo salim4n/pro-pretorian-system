@@ -13,13 +13,14 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
 
-import { UserView } from "@/app/lib/identity/definition"
+import { UserView } from "@/lib/identity/definition"
 import { useEffect, useState, useRef } from "react"
-import { ModelComputerVision } from "@/models/model-list"
+import { ModelComputerVision, ModelList, modelList } from "@/models/model-list"
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import { Badge } from "./ui/badge"
-import { cocossdVideoInference } from "@/app/lib/cocossd/detect"
-import { detectVideo } from "@/app/lib/yolov8n/detect"
+import { cocossdVideoInference } from "@/lib/cocossd/detect"
+import { detectVideo } from "@/lib/yolov8n/detect"
+import ModelLoader from "./model-loader"
 
 interface IProps {
   user: UserView
@@ -36,6 +37,7 @@ export default function VideoInference({ user }: IProps) {
   const [videoSrc, setVideoSrc] = useState<string | null>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const [percentLoaded, setPercentLoaded] = useState<number>(0)
 
   useEffect(() => {
     tf.setBackend("webgl")
@@ -59,16 +61,18 @@ export default function VideoInference({ user }: IProps) {
           .finally(() => setLoadModel(false))
       }
 
-      if (modelName === ModelComputerVision.YOLOV8N) {
+      if (modelName === ModelComputerVision.DETECTION) {
         coco?.dispose()
         setLoadModel(true)
         setCoco(null)
         tf.ready().then(async () => {
           const yolov8 = await tf.loadGraphModel(
-            `https://huggingface.co/salim4n/yolov8n_web_model/resolve/main/model.json`,
+            modelList.find(
+              model => model.title === ModelComputerVision.DETECTION
+            )?.url as string,
             {
               onProgress: fractions => {
-                console.log(`Loading YOLOv8n: ${fractions * 100}%`)
+                setPercentLoaded(fractions * 100)
               },
             }
           ) // load model
@@ -100,7 +104,7 @@ export default function VideoInference({ user }: IProps) {
   const handleCreateVideoWithBoundingBox = () => {
     if (modelName === ModelComputerVision.COCO_SSD) {
       cocossdVideoInference(coco, videoRef, canvasRef)
-    } else if (modelName === ModelComputerVision.YOLOV8N) {
+    } else if (modelName === ModelComputerVision.DETECTION) {
       detectVideo(videoRef.current, yolo, canvasRef)
     }
   }
@@ -183,26 +187,12 @@ export default function VideoInference({ user }: IProps) {
           </CardContent>
         </Card>
         {loadModel ? (
-          <Card className="bg-background">
-            <CardHeader className="flex flex-row items-start bg-muted/50">
-              <div className="grid gap-0.5">
-                <CardTitle className="text-lg">Loading Model</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="w-full text-center flex justify-center items-center">
-                <Avatar className="w-24 h-24">
-                  <AvatarImage src="/icon.jpeg" />
-                  <AvatarFallback>PR</AvatarFallback>
-                </Avatar>
-                <Badge variant="default" className="mt-4">
-                  <strong className="ml-4">
-                    {loadModel && "Loading Object Detection Model"}
-                  </strong>
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
+          <ModelLoader
+            percent={percentLoaded}
+            model={
+              modelList.find(model => model.title === modelName) as ModelList
+            }
+          />
         ) : (
           <Card>
             <CardHeader className="flex flex-row items-start bg-muted/50">

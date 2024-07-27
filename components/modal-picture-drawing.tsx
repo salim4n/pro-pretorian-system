@@ -1,4 +1,4 @@
-import { drawRect } from "@/app/lib/utils"
+import { drawRect } from "@/lib/utils"
 import { ObjectDetection, load } from "@tensorflow-models/coco-ssd"
 import { useEffect, useRef } from "react"
 

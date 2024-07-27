@@ -1,6 +1,6 @@
 import Board from "@/components/Board"
-import { verifySession } from "./lib/identity/session-local"
-import { UserView } from "./lib/identity/definition"
+import { verifySession } from "../lib/identity/session-local"
+import { UserView } from "../lib/identity/definition"
 import { redirect } from "next/navigation"
 
 async function BoardPage() {

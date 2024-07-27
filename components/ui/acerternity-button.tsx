@@ -1,5 +1,5 @@
 "use client"
-import { cn } from "@/app/lib/utils"
+import { cn } from "@/lib/utils"
 import { IconClipboard } from "@tabler/icons-react"
 import React from "react"
 

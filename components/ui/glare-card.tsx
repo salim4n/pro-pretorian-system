@@ -1,4 +1,4 @@
-import { cn } from "@/app/lib/utils"
+import { cn } from "@/lib/utils"
 import { useRef } from "react"
 
 export const GlareCard = ({

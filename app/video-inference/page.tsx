@@ -1,5 +1,5 @@
-import { UserView } from "../lib/identity/definition"
-import { verifySession } from "../lib/identity/session-local"
+import { UserView } from "../../lib/identity/definition"
+import { verifySession } from "../../lib/identity/session-local"
 import VideoInference from "@/components/VideoInference"
 
 export default async function VideoInferencePage() {
