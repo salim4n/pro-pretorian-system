@@ -53,73 +53,135 @@ export const detectFrame = async (
   callback = () => {}
 ) => {
   const [modelHeight, modelWidth] = model.inputShape.slice(1, 3) // get model width and height
+  console.log(model.outputShape)
   const [modelSegHeight, modelSegWidth, modelSegChannel] =
-    model.outputShape[1].slice(1)
+    model?.outputShape[1].slice(1) // get model segmentation output shape
 
   tf.engine().startScope() // start scoping tf engine
 
   const [input, xRatio, yRatio] = preprocess(source, modelWidth, modelHeight) // do preprocessing
 
   const res = model.net.execute(input) // execute model
-  const transRes = tf.tidy(() => res[0].transpose([0, 2, 1]).squeeze()) // transpose main result
-  const transSegMask = tf.tidy(() => res[1].transpose([0, 3, 1, 2]).squeeze()) // transpose segmentation mask result
+  console.log("res", res[0].shape, res[1].shape)
+  console.table(res)
+
+  // Check the shape of res[0]
+  const res0Shape = res[0].shape
+  console.log("res[0] shape:", res0Shape)
+
+  let transRes
+  if (res0Shape.length === 4) {
+    transRes = tf.tidy(() => res[0].transpose([0, 2, 3, 1]).squeeze()) // Adjust permutation for rank 4
+  } else if (res0Shape.length === 3) {
+    transRes = tf.tidy(() => res[0].transpose([0, 2, 1]).squeeze()) // Original permutation for rank 3
+  } else {
+    throw new Error("Unexpected tensor shape for res[0]")
+  }
+
+  console.log(transRes.shape) // Log the shape of transRes
+
+  // Check the shape of res[1]
+  const res1Shape = res[1].shape
+  console.log("res[1] shape:", res1Shape)
+
+  let transSegMask
+  if (res1Shape.length === 4) {
+    transSegMask = tf.tidy(() => res[1].transpose([0, 3, 1, 2]).squeeze()) // Adjust permutation for rank 4
+  } else if (res1Shape.length === 3) {
+    transSegMask = tf.tidy(() => res[1].transpose([0, 2, 1]).squeeze()) // Adjust permutation for rank 3
+  } else {
+    throw new Error("Unexpected tensor shape for res[1]")
+  }
+
+  console.log("transRes.shape:", transRes.shape) // Log the shape of transRes
+
+  const numChannels = transRes.shape[2] // Get the number of channels (160 in this case)
+  const validClasses = Math.min(numClass, numChannels - 4) // Ensure we do not exceed available channels
+
+  console.log("numChannels:", numChannels)
+  console.log("validClasses:", validClasses)
 
   const boxes = tf.tidy(() => {
     const w = transRes.slice([0, 2], [-1, 1])
     const h = transRes.slice([0, 3], [-1, 1])
-    const x1 = tf.sub(transRes.slice([0, 0], [-1, 1]), tf.div(w, 2)) //x1
-    const y1 = tf.sub(transRes.slice([0, 1], [-1, 1]), tf.div(h, 2)) //y1
+    const x1 = tf.sub(transRes.slice([0, 0], [-1, 1]), tf.div(w, 2)) // x1
+    const y1 = tf.sub(transRes.slice([0, 1], [-1, 1]), tf.div(h, 2)) // y1
     return tf
       .concat(
         [
           y1,
           x1,
-          tf.add(y1, h), //y2
-          tf.add(x1, w), //x2
+          tf.add(y1, h), // y2
+          tf.add(x1, w), // x2
         ],
         1
-      ) // [y1, x1, y2, x2]
-      .squeeze() // [n, 4]
-  }) // get boxes [y1, x1, y2, x2]
+      )
+      .reshape([-1, 4]) // reshape to [numBoxes, 4]
+  })
 
+  console.log("boxes.shape:", boxes.shape) // Log the shape of boxes
   const [scores, classes] = tf.tidy(() => {
-    const rawScores = transRes.slice([0, 4], [-1, numClass]).squeeze() // [n, 1]
-    return [rawScores.max(1), rawScores.argMax(1)]
-  }) // get scores and classes
+    const shape = transRes.shape
+    const validClasses = shape[1] - 4 // adjust validClasses based on the shape of the tensor
+    const scores = transRes.slice([0, 4], [-1, validClasses]).reshape([-1]) // Adjust slicing to validClasses and reshape to 1D
+    const maxScore = scores.max() // Get the maximum score
+    return [scores, scores.argMax()] // Return the scores and the index of the maximum score
+  })
 
+  console.log("scores.shape:", scores.shape) // Log the shape of scores
+
+  // Resize scores to match the first dimension of boxes
+  const resizedScores = scores.slice(0, boxes.shape[0])
+
+  // Perform non-max suppression
   const nms = await tf.image.nonMaxSuppressionAsync(
     boxes as any,
-    scores,
+    resizedScores,
     500,
     0.45,
     0.2
-  ) // do nms to filter boxes
-  const detReady = tf.tidy(() =>
-    tf.concat(
-      [
-        boxes.gather(nms, 0),
-        scores.gather(nms, 0).expandDims(1),
-        classes.gather(nms, 0).expandDims(1),
-      ],
-      1 // axis
+  )
+
+  console.log("nms.shape:", nms.shape)
+  console.log("boxes.shape:", boxes.shape)
+  console.log("scores.shape:", scores.shape)
+  console.log("classes.shape:", classes.shape)
+
+  const detReady = tf.tidy(() => {
+    const indices = nms.expandDims(-1)
+    const gatheredBoxes = tf.gatherND(boxes, indices)
+    const gatheredScores = tf.gatherND(scores, indices).expandDims(1)
+    const scalar = classes // This is your scalar value
+    const shape = [nms.shape[0]] // This is the shape of the new tensor, assuming nms is 1D
+    const classes1D = tf.fill(shape, scalar)
+
+    const gatheredClasses = classes1D.expandDims(1)
+
+    return tf.concat(
+      [gatheredBoxes, gatheredScores, gatheredClasses],
+      1 // axis 1 for concatenation along the columns
     )
-  ) // indexing selected boxes, scores and classes from NMS result
+  })
+
+  console.log("detReady.shape:", detReady.shape)
+
   const masks = tf.tidy(() => {
-    const sliced = transRes
-      .slice([0, 4 + numClass], [-1, modelSegChannel])
-      .squeeze() // slice mask from every detection [m, mask_size]
-    return sliced
-      .gather(nms, 0) // get selected mask from NMS result
-      .matMul(transSegMask.reshape([modelSegChannel, -1])) // matmul mask with segmentation mask result [n, mask_size] x [mask_size, h x w] => [n, h x w]
-      .reshape([nms.shape[0], modelSegHeight, modelSegWidth]) // reshape back [n, h x w] => [n, h, w]
-  }) // processing mask
+    if (modelSegChannel !== undefined) {
+      const sliced = transRes
+        .slice([0, 4 + numClass], [-1, modelSegChannel])
+        .squeeze() // slice mask from every detection [m, mask_size]
+      // Rest of your code...
+    } else {
+      throw new Error("modelSegChannel is undefined.")
+    }
+  })
 
   const toDraw = [] // list boxes to draw
   let overlay = tf.zeros([modelHeight, modelWidth, 4]) // initialize overlay to draw mask
 
   for (let i = 0; i < detReady.shape[0]; i++) {
     const rowData = detReady.slice([i, 0], [1, 6]) // get every first 6 element from every row
-    let [y1, x1, y2, x2, score, label] = rowData.dataSync() // [y1, x1, y2, x2, score, label]
+    const [y1, x1, y2, x2, score, label] = Array.from(rowData.dataSync()) // [y1, x1, y2, x2, score, label]
     const color = colors.get(label) // get label color
 
     const downSampleBox = [
@@ -136,7 +198,7 @@ export const detectFrame = async (
     ] // upsampled box (box ratio to draw)
 
     const proto = tf.tidy(() => {
-      const sliced = masks.slice(
+      const sliced = (masks as any).slice(
         [
           i,
           downSampleBox[0] >= 0 ? downSampleBox[0] : 0,
@@ -151,8 +213,8 @@ export const detectFrame = async (
             ? downSampleBox[3]
             : modelSegWidth - downSampleBox[1],
         ]
-      ) // coordinate to slice mask from proto
-      return sliced.squeeze().expandDims(-1) // sliced proto [h, w, 1]
+      )
+      return sliced.reshape([sliced.shape[1], sliced.shape[2], 1]) // slicing mask to boxes and reshape to [h, w, 1]
     })
     const upsampleProto = tf.image.resizeBilinear(proto, [
       upSampleBox[2],
