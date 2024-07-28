@@ -1,13 +1,10 @@
 "use client"
 
-import "@tensorflow/tfjs-backend-cpu"
-import "@tensorflow/tfjs-backend-webgl"
 import { useRef, useEffect, useState } from "react"
 import {
   load as cocoSSDLoad,
   type ObjectDetection,
 } from "@tensorflow-models/coco-ssd"
-import * as tf from "@tensorflow/tfjs"
 import Webcam from "react-webcam"
 import { Detected, sendPicture } from "@/lib/send-detection/action"
 import { Switch } from "@/components/ui/switch"
@@ -21,8 +18,10 @@ import {
   CardTitle,
   CardDescription,
 } from "./ui/card"
+import { useTfjsBackendWeb } from "@/hooks/use-tfjs-backend"
 
 export default function Board({ user }) {
+  const ready = useTfjsBackendWeb({ backend: "webgl" })
   const [cameras, setCameras] = useState<MediaDeviceInfo[]>([])
   const webcamRefs = useRef<Webcam[]>([])
   const [net, setNet] = useState<ObjectDetection | null>(null)
@@ -53,7 +52,6 @@ export default function Board({ user }) {
   }
 
   useEffect(() => {
-    tf.setBackend("webgl")
     navigator.mediaDevices
       .enumerateDevices()
       .then(devices => {
@@ -64,14 +62,10 @@ export default function Board({ user }) {
         setCameraChecked(videoDevices.map(() => true))
       })
       .then(() => runCocoSsd())
-
-    return () => {
-      net?.dispose()
-      tf.disposeVariables()
-    }
   }, [])
 
   useEffect(() => {
+    if (!ready) return
     if (net) {
       const detectInterval = setInterval(() => {
         runObjectDetection(net)
@@ -79,11 +73,9 @@ export default function Board({ user }) {
 
       return () => {
         clearInterval(detectInterval)
-        net?.dispose()
-        tf.disposeVariables()
       }
     }
-  }, [net])
+  }, [net, ready])
 
   if (modelLoading) {
     return (

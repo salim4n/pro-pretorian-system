@@ -1,7 +1,5 @@
 "use client"
 
-import "@tensorflow/tfjs-backend-webgl"
-import * as tf from "@tensorflow/tfjs"
 import { Card, CardContent, CardHeader } from "./ui/card"
 import { Skeleton } from "./ui/skeleton"
 import { useEffect, useRef, useState } from "react"
@@ -21,12 +19,14 @@ import Image from "next/image"
 import { UserView } from "@/lib/identity/definition"
 import { CardBody, CardContainer, CardItem } from "./ui/3d-card"
 import { BackgroundGradient } from "./ui/background-gradient"
+import { useTfjsBackendWeb } from "@/hooks/use-tfjs-backend"
 
 interface IProps {
   user: UserView
 }
 
 export default function History({ user }: IProps) {
+  const ready = useTfjsBackendWeb({ backend: "webgl" })
   const [loading, setLoading] = useState<boolean>(false)
   const { toast } = useToast()
   const actualDate = new Date()
@@ -82,9 +82,10 @@ export default function History({ user }: IProps) {
   }
 
   useEffect(() => {
-    tf.setBackend("webgl")
-    loadModel()
-  }, [])
+    if (ready) {
+      loadModel()
+    }
+  }, [ready])
 
   useEffect(() => {
     fetchPicturesFromRange()
