@@ -36,10 +36,17 @@ export default function History({ user }: IProps) {
     from: new Date(actualYear, actualMonth, 1),
     to: addDays(new Date(actualYear, actualMonth, 1), 6),
   })
-  const [model, setModel] = useState<ObjectDetection | null>(null)
+  const [coco, setCoco] = useState<ObjectDetection | null>(null)
+  const [yolo, setYolo] = useState({
+    net: null,
+    inputShape: [1, 0, 0, 3],
+  }) // init model & input shape of YOLO DETECTION
+  const [yoloSeg, setYoloSeg] = useState({
+    net: null,
+    inputShape: [1, 0, 0, 3],
+  }) // init model & input shape of YOLO SEGMENTATION
   const [pictures, setPictures] = useState<string[]>([])
   const [isDeleting, setIsDeleting] = useState<boolean>(false)
-  const [isDownloading, setIsDownloading] = useState<boolean>(false)
   const [modelLoading, setModelLoading] = useState<boolean>(false)
   const canvasRefs = useRef<HTMLCanvasElement[]>([])
 
@@ -48,7 +55,7 @@ export default function History({ user }: IProps) {
     setModelLoading(true)
     try {
       const loadedModel = await load()
-      setModel(loadedModel)
+      setCoco(loadedModel)
       toast({
         title: "Modèle de reconnaissance chargé",
         description:
@@ -84,7 +91,7 @@ export default function History({ user }: IProps) {
   }, [date])
 
   useEffect(() => {
-    if (model && pictures.length > 0) {
+    if (coco && pictures.length > 0) {
       pictures.forEach((picture, index) => {
         const img = new window.Image()
         img.crossOrigin = "anonymous"
@@ -95,7 +102,7 @@ export default function History({ user }: IProps) {
           if (context) {
             context.clearRect(0, 0, canvas.width, canvas.height)
             context.drawImage(img, 0, 0, canvas.width, canvas.height)
-            model.detect(canvas).then(predictions => {
+            coco.detect(canvas).then(predictions => {
               predictions.forEach(prediction => {
                 const [x, y, width, height] = prediction.bbox
                 const text = `${prediction.class} (${Math.round(
@@ -118,7 +125,7 @@ export default function History({ user }: IProps) {
         }
       })
     }
-  }, [model, pictures])
+  }, [coco, pictures])
 
   async function handleDeleteAllSelection() {
     const confirmation = window.confirm(
@@ -159,7 +166,6 @@ export default function History({ user }: IProps) {
               <strong className="ml-4">
                 {modelLoading && "Chargement du modèle de reconnaissance"}
                 {isDeleting && "Suppression des detections en cours"}
-                {isDownloading && "Téléchargement des detections en cours"}
               </strong>
             </Badge>
           </div>
