@@ -58,6 +58,7 @@
     "tailwind-merge": "^2.4.0",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^9.0.1",
+    "yolo-tfjs": "^0.0.0",
     "zod": "^3.23.8",
     "zustand": "^4.5.4"
   },

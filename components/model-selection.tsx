@@ -42,6 +42,15 @@ export default function ModelSelection() {
           </DropdownMenu>
         </div>
       </CardContent>
+      <CardContent className="p-16">
+        <Button
+          disabled={!modelName}
+          variant="outline"
+          className="w-full"
+          onClick={() => setModel("")}>
+          Réinitialiser
+        </Button>
+      </CardContent>
     </Card>
   )
 }

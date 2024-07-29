@@ -15,7 +15,6 @@ interface IProps {
   setDate: Dispatch<SetStateAction<DateRange>>
   pictures?: string[]
   handleDeleteAllSelection: () => void
-  loadModel: boolean
 }
 
 export default function HistorySelect({
@@ -23,7 +22,6 @@ export default function HistorySelect({
   setDate,
   pictures,
   handleDeleteAllSelection,
-  loadModel,
 }: IProps) {
   return (
     <Card className="bg-background">
@@ -37,7 +35,6 @@ export default function HistorySelect({
           <Popover>
             <PopoverTrigger asChild>
               <Button
-                disabled={loadModel}
                 id="date"
                 variant={"outline"}
                 className={cn(
