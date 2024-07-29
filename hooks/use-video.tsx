@@ -7,7 +7,7 @@ type VideoStore = {
   setVideoSrc: (videoSrc: string | null) => void
 }
 
-export const useVideoStore = (): VideoStore => {
+export const useVideo = (): VideoStore => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const [videoSrc, setVideoSrc] = useState<string | null>("")

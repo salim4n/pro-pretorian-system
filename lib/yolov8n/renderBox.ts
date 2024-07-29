@@ -16,12 +16,14 @@ export const renderBoxes = (
   classes_data: any,
   ratios: any
 ) => {
+  if (!canvasRef.current) {
+    throw new Error("Canvas is not mounted")
+  }
+
   const ctx = canvasRef.current?.getContext("2d")
   if (!ctx) {
     throw new Error("Could not get 2D context from canvas")
   }
-  canvasRef.current.width = source.videoWidth
-  canvasRef.current.height = source.videoHeight
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height) // clean canvas
 
   const colors = new Colors()

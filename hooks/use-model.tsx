@@ -5,8 +5,6 @@ import { ModelComputerVision, modelList } from "@/models/model-list"
 
 interface IProps {
   ready: boolean
-  setLoadModel: (value: boolean) => void
-  setPercentLoaded: (value: number) => void
 }
 
 export type ModelGraph = {
@@ -15,17 +13,14 @@ export type ModelGraph = {
   outputShape?: number[]
 }
 
-export default function useModel({
-  ready,
-  setLoadModel,
-  setPercentLoaded,
-}: IProps) {
+export default function useModel({ ready }: IProps) {
   const { modelName } = useModelStore()
   const [model, setModel] = useState<ModelGraph>(null)
+  const [loadModel, setLoadModel] = useState<boolean>(false)
+  const [percentLoaded, setPercentLoaded] = useState<number>(0)
 
   useEffect(() => {
     if (!ready) return
-    console.log("model", modelName)
     if (modelName === ModelComputerVision.DETECTION) {
       model && model?.net.dispose()
       setLoadModel(true)
@@ -59,7 +54,7 @@ export default function useModel({
       tf.ready().then(async () => {
         const yolov8 = await tf.loadGraphModel(
           modelList.find(
-            model => model.title === ModelComputerVision.SEGMENTATION
+            model => model?.title === ModelComputerVision.SEGMENTATION
           )?.url as string,
           {
             onProgress: fractions => {
@@ -92,5 +87,5 @@ export default function useModel({
     }
   }, [modelName, ready])
 
-  return { model }
+  return { model, loadModel, percentLoaded }
 }

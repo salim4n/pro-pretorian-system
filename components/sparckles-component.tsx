@@ -1,7 +1,7 @@
 "use client"
 
 import { useTheme } from "next-themes"
-import { SparklesCore } from "../ui/sparkles"
+import { SparklesCore } from "./ui/sparkles"
 
 interface IProps {
   minSize: number
