@@ -1,8 +1,8 @@
-import { useRef, useState } from "react"
+import { MutableRefObject, useRef, useState } from "react"
 
 type VideoStore = {
-  canvasRef: React.MutableRefObject<HTMLCanvasElement | null>
-  videoRef: React.MutableRefObject<HTMLVideoElement | null>
+  canvasRef: MutableRefObject<HTMLCanvasElement | null>
+  videoRef: MutableRefObject<HTMLVideoElement | null>
   videoSrc: string | null
   setVideoSrc: (videoSrc: string | null) => void
 }
