@@ -4,7 +4,7 @@ import Link from "next/link"
 import { Input } from "./ui/input"
 import { Button } from "./ui/button"
 import { z } from "zod"
-import { LoginFormSchema } from "@/lib/identity/definition"
+
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
@@ -17,12 +17,14 @@ import {
   FormLabel,
   FormMessage,
 } from "./ui/form"
-import { login } from "@/lib/identity/auth"
+
 import { AuroraBackground } from "./ui/aurora-background"
 import { motion } from "framer-motion"
 import { useTheme } from "next-themes"
 import { Meteors } from "./ui/meteors"
 import { BlurIn } from "./ui/text-blur"
+import { login } from "@/app/lib/identity/auth"
+import { LoginFormSchema } from "@/app/lib/identity/definition"
 
 export default function Login() {
   const { theme } = useTheme()
