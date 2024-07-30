@@ -4,7 +4,7 @@ import Link from "next/link"
 import { Input } from "./ui/input"
 import { Button } from "./ui/button"
 import { z } from "zod"
-import { LoginFormSchema } from "@/app/lib/identity/definition"
+
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
@@ -17,13 +17,14 @@ import {
   FormLabel,
   FormMessage,
 } from "./ui/form"
-import { login } from "@/app/lib/identity/auth"
+
 import { AuroraBackground } from "./ui/aurora-background"
 import { motion } from "framer-motion"
 import { useTheme } from "next-themes"
 import { Meteors } from "./ui/meteors"
-import { TextGenerateEffect } from "./ui/text-generate-effect"
 import { BlurIn } from "./ui/text-blur"
+import { login } from "@/app/lib/identity/auth"
+import { LoginFormSchema } from "@/app/lib/identity/definition"
 
 export default function Login() {
   const { theme } = useTheme()
@@ -65,7 +66,7 @@ export default function Login() {
         onMouseLeave={() => setButtonHover(false)}>
         <div className="grid gap-2 text-center">
           <BlurIn
-            text="Pretorian System Security"
+            text="Pro Pretorian System Solution  "
             balise="h1"
             className={`text-3xl font-bold  bg-gradient-to-r from-indigo-500 via-yellow-500 to-indigo-500 inline-block text-transparent bg-clip-text`}
           />{" "}
@@ -84,8 +85,7 @@ export default function Login() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel
-                    className={theme === "light" ? "text-black" : "text-white"}>
+                  <FormLabel className="text-indigo-500">
                     <BlurIn text="Email" balise="span" className="text-sm" />
                   </FormLabel>
                   <FormControl>
@@ -93,9 +93,7 @@ export default function Login() {
                       type="email"
                       autoComplete="username"
                       placeholder="Votre email..."
-                      className={
-                        theme === "light" ? "text-black" : "text-white"
-                      }
+                      className="text-indigo-500"
                       {...field}
                     />
                   </FormControl>
@@ -108,8 +106,7 @@ export default function Login() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel
-                    className={theme === "light" ? "text-black" : "text-white"}>
+                  <FormLabel className="text-indigo-500">
                     <BlurIn
                       text="Mot de passe"
                       balise="span"
@@ -121,9 +118,7 @@ export default function Login() {
                       type="password"
                       autoComplete="new-password"
                       placeholder="Votre mot de passe..."
-                      className={
-                        theme === "light" ? "text-black" : "text-white"
-                      }
+                      className="text-indigo-500"
                       {...field}
                     />
                   </FormControl>
@@ -143,10 +138,7 @@ export default function Login() {
             </Button>
           </form>
         </Form>
-        <div
-          className={`mt-4 text-center text-sm z-10 ${
-            theme === "light" ? "text-black" : "text-white"
-          }`}>
+        <div className={`mt-4 text-center text-sm z-10 text-indigo-500`}>
           <BlurIn text="Vous n'avez pas de compte ?" balise="span" />
           <Link href="/register" className="underline ml-1 border ">
             <BlurIn text="Inscrivez-vous" balise="span" className="text-sm" />

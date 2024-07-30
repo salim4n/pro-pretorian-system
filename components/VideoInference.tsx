@@ -142,6 +142,35 @@ export default function VideoInference({ user }: IProps) {
                   disabled={!model || !videoSrc}>
                   Traiter la vidéo
                 </Button>
+                {/* button to remove video in input and video */}
+                <Button
+                  variant="destructive"
+                  className="hover:bg-red-500"
+                  onClick={() => {
+                    setVideoSrc(null)
+                    const inputFile = document.getElementById("inputFile")
+                    if (inputFile) {
+                      inputFile.setAttribute("value", "")
+                    }
+                    if (videoRef.current) {
+                      videoRef.current.load()
+                    }
+
+                    if (canvasRef.current) {
+                      const context = canvasRef.current.getContext("2d")
+                      if (context) {
+                        context.clearRect(
+                          0,
+                          0,
+                          canvasRef.current.width,
+                          canvasRef.current.height
+                        )
+                      }
+                    }
+                  }}
+                  disabled={!videoSrc}>
+                  Vider le lecteur vidéo
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -203,7 +232,7 @@ export default function VideoInference({ user }: IProps) {
             </Card>
           )}
 
-          <Card>
+          {/* <Card>
             <CardHeader className="flex flex-row items-start bg-muted/50">
               <div className="grid gap-0.5">
                 <CardTitle className="text-lg">Actions</CardTitle>
@@ -216,7 +245,7 @@ export default function VideoInference({ user }: IProps) {
                 </Button>
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
         </div>
       </main>
     </div>
@@ -237,43 +266,6 @@ function ChevronDownIcon(props) {
       strokeLinecap="round"
       strokeLinejoin="round">
       <path d="m6 9 6 6 6-6" />
-    </svg>
-  )
-}
-
-function PlayIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round">
-      <polygon points="6 3 20 12 6 21 6 3" />
-    </svg>
-  )
-}
-
-function XIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round">
-      <path d="M18 6 6 18" />
-      <path d="m6 6 12 12" />
     </svg>
   )
 }
