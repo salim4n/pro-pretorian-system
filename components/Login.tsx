@@ -23,8 +23,8 @@ import { motion } from "framer-motion"
 import { useTheme } from "next-themes"
 import { Meteors } from "./ui/meteors"
 import { BlurIn } from "./ui/text-blur"
-import { login } from "@/app/lib/identity/auth"
-import { LoginFormSchema } from "@/app/lib/identity/definition"
+import { LoginFormSchema } from "@/lib/identity/definition"
+import { login } from "@/lib/identity/auth"
 
 export default function Login() {
   const { theme } = useTheme()

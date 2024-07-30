@@ -13,11 +13,11 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
 
-import { UserView } from "@/app/lib/identity/definition"
 import { useEffect, useState, useRef } from "react"
 import { ModelComputerVision } from "@/models/model-list"
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import { Badge } from "./ui/badge"
+import { UserView } from "@/lib/identity/definition"
 
 interface IProps {
   user: UserView
@@ -99,7 +99,6 @@ export default function VideoInference({ user }: IProps) {
 
   return (
     <div className="m-5 flex min-h-screen w-full flex-col bg-muted/40">
-      <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6"></header>
       <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 lg:grid-cols-3 xl:grid-cols-3">
         <div className="lg:col-span-2">
           <Card className="overflow-hidden bg-background">
