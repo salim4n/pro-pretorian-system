@@ -18,7 +18,8 @@ export default function ModelLoader({ percent, model }: IProps) {
       <CardContent className="p-6">
         <div className="w-full text-center flex flex-col justify-center items-center">
           <Progress value={percent} />
-          <BlurIn balise="p" text={`${percent} %`} />
+          {percent && <BlurIn balise="p" text={`${percent} %`} />}
+
           <BlurIn balise="p" text={model.description} />
         </div>
       </CardContent>

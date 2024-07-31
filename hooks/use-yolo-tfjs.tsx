@@ -3,15 +3,17 @@ import { yoloLabels } from "@/lib/yolov8n/label"
 import { modelList } from "@/models/model-list"
 import { useEffect, useState } from "react"
 import YOLOTf from "yolo-tfjs"
+import * as tf from "@tensorflow/tfjs"
 
 interface IProps {
   ready: boolean
 }
 
-export default function useYoloTfjs({ ready }: IProps) {
+export default function useYolodisTfjs({ ready }: IProps) {
   const { modelName } = useModelStore()
   const [model, setModel] = useState<YOLOTf>(null)
   const [loadModel, setLoadModel] = useState<boolean>(false)
+  const [disposeDetect, setDisposeDetect] = useState<boolean>(false)
   const [percentLoaded, setPercentLoaded] = useState<number>(0)
 
   const modelDef = modelList.find(model => model.title === modelName)
@@ -41,5 +43,14 @@ export default function useYoloTfjs({ ready }: IProps) {
     }
   }, [ready, modelName])
 
-  return { model, loadModel, percentLoaded }
+  function disposeModel() {
+    disposeDetect && tf.disposeVariables()
+    tf.dispose()
+  }
+
+  useEffect(() => {
+    disposeModel()
+  }, [disposeDetect])
+
+  return { model, loadModel, percentLoaded, setDisposeDetect }
 }
