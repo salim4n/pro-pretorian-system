@@ -17,7 +17,7 @@ interface IProps {
 
 export default function VideoInference({ user }: IProps) {
   const ready = useTfjsBackendWeb({ backend: "webgl" })
-  const { cocoSsd, loadCoco, setDisposeCoco } = useCocoSsd({ ready })
+  const { cocoSsd, loadCoco } = useCocoSsd({ ready })
   const { model, loadModel, percentLoaded, setDisposeDetect } = useYoloTfjs({
     ready,
   })
@@ -93,7 +93,8 @@ export default function VideoInference({ user }: IProps) {
             model={modelList.find(
               model =>
                 model.title === ModelComputerVision.COCO_SSD ||
-                model.title === ModelComputerVision.DETECTION
+                model.title === ModelComputerVision.DETECTION ||
+                model.title === ModelComputerVision.SEGMENTATION
             )}
           />
         ) : (

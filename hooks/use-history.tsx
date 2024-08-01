@@ -1,7 +1,7 @@
 import { UserView } from "@/lib/identity/definition"
 import { getPictures } from "@/lib/send-detection/action"
 import { addDays } from "date-fns"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { DateRange } from "react-day-picker"
 
 interface IProps {

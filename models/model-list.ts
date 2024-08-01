@@ -2,6 +2,7 @@ export enum ModelComputerVision {
   COCO_SSD = "Coco SSD",
   DETECTION = "Detection",
   SEGMENTATION = "Segmentation",
+  EMPTY = "",
 }
 
 export type ModelList = {

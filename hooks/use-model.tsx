@@ -85,6 +85,13 @@ export default function useModel({ ready }: IProps) {
         setLoadModel(false)
       })
     }
+    if (modelName === ModelComputerVision.EMPTY) {
+      if (model && model.net) {
+        model.net.dispose()
+        console.log(tf.memory())
+      }
+      setModel(null)
+    }
   }, [modelName, ready])
 
   return { model, loadModel, percentLoaded }

@@ -1,163 +1,142 @@
 "use client"
 
-import { useRef, useEffect, useState } from "react"
-import {
-  load as cocoSSDLoad,
-  type ObjectDetection,
-} from "@tensorflow-models/coco-ssd"
-import Webcam from "react-webcam"
+import { type ObjectDetection } from "@tensorflow-models/coco-ssd"
 import { Detected, sendPicture } from "@/lib/send-detection/action"
-import { Switch } from "@/components/ui/switch"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "./ui/card"
 import { useTfjsBackendWeb } from "@/hooks/use-tfjs-backend"
+import useCocoSsd from "@/hooks/use-cocossd"
+import ModelSelection from "./model-selection"
+import ModelLoader from "./model-loader"
+import { ModelComputerVision, modelList } from "@/models/model-list"
+import CameraCard from "./camera-card"
+import useBoardDetection from "@/hooks/use-board-detection"
+import useCamerasConfig from "@/hooks/use-cameras-config"
+import {
+  CameraStored,
+  getCameraByDeviceId,
+} from "@/lib/data/local-storage/camera-store"
+import { DetectedObject } from "@/lib/identity/definition"
+import Webcam from "react-webcam"
 
 export default function Board({ user }) {
   const ready = useTfjsBackendWeb({ backend: "webgl" })
-  const [cameras, setCameras] = useState<MediaDeviceInfo[]>([])
-  const webcamRefs = useRef<Webcam[]>([])
-  const [net, setNet] = useState<ObjectDetection | null>(null)
-  const [cameraChecked, setCameraChecked] = useState<boolean[]>([])
-  const [modelLoading, setModelLoading] = useState(true)
+  const { cocoSsd, loadCoco } = useCocoSsd({ ready })
+  const { webcamRefs, cameras } = useCamerasConfig()
+  useBoardDetection({
+    ready,
+    net: cocoSsd,
+    runObjectDetection,
+  })
 
-  async function runCocoSsd() {
-    const loadedNet = await cocoSSDLoad()
-    setNet(loadedNet)
-    setModelLoading(false)
+  function isDetectionInZone(
+    detection,
+    zone,
+    videoWidth,
+    videoHeight,
+    canvasWidth,
+    canvasHeight
+  ) {
+    const [x, y, width, height] = detection
+    const { x: zoneX, y: zoneY, width: zoneWidth, height: zoneHeight } = zone
+
+    const xRatio = canvasWidth / videoWidth
+    const yRatio = canvasHeight / videoHeight
+
+    const canvasX = x * xRatio
+    const canvasY = y * yRatio
+    const canvasDetectionWidth = width * xRatio
+    const canvasDetectionHeight = height * yRatio
+
+    return (
+      canvasX >= zoneX &&
+      canvasY >= zoneY &&
+      canvasX + canvasDetectionWidth <= zoneX + zoneWidth &&
+      canvasY + canvasDetectionHeight <= zoneY + zoneHeight
+    )
+  }
+
+  async function ifHaveDetectionZone(
+    cameraStorage: CameraStored,
+    o: DetectedObject,
+    webcam: Webcam
+  ) {
+    const isIn = isDetectionInZone(
+      o.bbox,
+      cameraStorage.detectionZone,
+      webcam.video.videoWidth,
+      webcam.video.videoHeight,
+      webcam.video.offsetWidth,
+      webcam.video.offsetHeight
+    )
+    console.log(isIn)
+    if (o.class === "person" && isIn) {
+      const body = {
+        detected: o,
+        picture: webcam.getScreenshot({ width: 640, height: 480 }),
+      }
+      console.log("body", body)
+      await sendPicture(body as Detected, user)
+    }
+  }
+
+  async function ifDontHaveDetectionZone(o: DetectedObject, webcam: Webcam) {
+    if (o.class === "person") {
+      const body = {
+        detected: o,
+        picture: webcam.getScreenshot({ width: 640, height: 480 }),
+      }
+      console.log("body", body)
+      await sendPicture(body as Detected, user)
+    }
   }
 
   async function runObjectDetection(net: ObjectDetection) {
     webcamRefs.current.forEach(async webcam => {
       if (webcam !== null && webcam.video?.readyState === 4) {
+        const deviceId = (webcam.props.videoConstraints as any).deviceId
+        const cameraStorage = getCameraByDeviceId(deviceId)
+        if (cameraStorage.noDetectTime === null) return
+        if (cameraStorage.noDetectTime.length === 8) {
+          // check if the time is between the noDetectTime, split by 4 : HHmm - HHmm
+          const now = new Date()
+          const nowHours = now.getHours()
+          const nowMinutes = now.getMinutes()
+          const nowTime = `${nowHours}${nowMinutes}`
+          const [start, end] = cameraStorage.noDetectTime.match(/.{1,4}/g)
+          if (nowTime >= start && nowTime <= end) {
+            console.log("no detect time")
+            return
+          }
+        }
         const objectDetected = await net.detect(webcam.video, undefined, 0.5)
         objectDetected.forEach(async o => {
-          if (o.class === "person") {
-            const body = {
-              detected: o,
-              picture: webcam.getScreenshot({ width: 640, height: 480 }),
-            }
-            await sendPicture(body as Detected, user)
+          if (cameraStorage.detectionZone !== null) {
+            ifHaveDetectionZone(cameraStorage, o, webcam)
+          } else {
+            ifDontHaveDetectionZone(o, webcam)
           }
         })
       }
     })
   }
 
-  useEffect(() => {
-    navigator.mediaDevices
-      .enumerateDevices()
-      .then(devices => {
-        const videoDevices = devices.filter(
-          device => device.kind === "videoinput"
-        )
-        setCameras(videoDevices)
-        setCameraChecked(videoDevices.map(() => true))
-      })
-      .then(() => runCocoSsd())
-  }, [])
-
-  useEffect(() => {
-    if (!ready) return
-    if (net) {
-      const detectInterval = setInterval(() => {
-        runObjectDetection(net)
-      }, 3000)
-
-      return () => {
-        clearInterval(detectInterval)
-      }
-    }
-  }, [net, ready])
-
-  if (modelLoading) {
-    return (
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-8">
-        <Card className="m-3 z-50">
-          <CardContent className="m-5">
-            <div className="w-full text-center flex justify-center items-center">
-              <Avatar className="w-48 h-48">
-                <AvatarImage src="/icon.jpeg" />
-                <AvatarFallback>PR</AvatarFallback>
-              </Avatar>
-              <Badge variant="default" className="mt-4">
-                <strong className="ml-4">
-                  {modelLoading && "Chargement du modèle de reconnaissance"}
-                </strong>
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="m-3 w-full lg:col-span-2 flex-grow">
-          <CardContent>
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-8">
-              {Array.from({ length: 4 }).map((_, index) => (
-                <Card key={index}>
-                  <CardHeader>
-                    <Skeleton className="w-full h-10" />
-                  </CardHeader>
-                  <CardContent>
-                    <Skeleton className="w-full h-40" />
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
   return (
-    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-8">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-8 mt-10">
+      {loadCoco ? (
+        <ModelLoader
+          model={modelList.find(
+            model => model.title === ModelComputerVision.COCO_SSD
+          )}
+        />
+      ) : (
+        <ModelSelection />
+      )}
       {cameras.map((camera, index) => (
-        <Card key={index} className="flex flex-col items-center mt-5">
-          <CardHeader>
-            <CardTitle>{camera.label}</CardTitle>
-            <CardDescription>
-              <div className="flex item-center">
-                <Switch
-                  id={camera.deviceId}
-                  defaultChecked
-                  checked={cameraChecked[index]}
-                  onCheckedChange={checked => {
-                    setCameraChecked(prev =>
-                      prev.map((_, i) => (i === index ? checked : _))
-                    )
-                  }}
-                  className="m-1 relative"
-                />
-                <strong>{cameraChecked[index] ? "On" : "Off"}</strong>
-              </div>
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {cameraChecked[index] && (
-              <Webcam
-                audio={false}
-                videoConstraints={{
-                  deviceId: camera.deviceId,
-                }}
-                ref={el => {
-                  if (el) {
-                    webcamRefs.current[index] = el
-                  }
-                }}
-                key={index}
-                width={640}
-                height={480}
-                className="m-1 rounded-md border-gray-500 border-2"
-              />
-            )}
-          </CardContent>
-        </Card>
+        <CameraCard
+          key={index}
+          camera={camera}
+          index={index}
+          webcamRefs={webcamRefs}
+        />
       ))}
     </div>
   )

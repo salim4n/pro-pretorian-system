@@ -12,7 +12,7 @@ import {
 import { useModelStore } from "@/lib/store/model-store"
 
 export default function ModelSelection() {
-  const { modelName, setModel } = useModelStore()
+  const { modelName, setModel, disposeModel } = useModelStore()
 
   return (
     <Card>
@@ -47,7 +47,7 @@ export default function ModelSelection() {
           disabled={!modelName}
           variant="outline"
           className="w-full"
-          onClick={() => setModel("")}>
+          onClick={() => disposeModel()}>
           Réinitialiser
         </Button>
       </CardContent>

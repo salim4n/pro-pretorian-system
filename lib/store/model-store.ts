@@ -1,11 +1,16 @@
+import { ModelComputerVision } from "@/models/model-list"
 import { create } from "zustand"
 
 type ModelStore = {
-  modelName: string
-  setModel: (model: string) => void
+  modelName: ModelComputerVision
+  setModel: (model: ModelComputerVision) => void
+  disposeModel: () => void
 }
 
 export const useModelStore = create<ModelStore>()(set => ({
-  modelName: "",
+  modelName: ModelComputerVision.EMPTY,
   setModel: modelName => set({ modelName }),
+  disposeModel: () => {
+    set({ modelName: ModelComputerVision.EMPTY })
+  },
 }))

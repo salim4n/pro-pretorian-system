@@ -11,7 +11,6 @@ export default function useCocoSsd({ ready }: IProps) {
   const { modelName } = useModelStore()
   const [cocoSsd, setCocoSsd] = useState<ObjectDetection>(null)
   const [loadCoco, setLoadCoco] = useState(false)
-  const [disposeCoco, setDisposeCoco] = useState(false)
 
   async function fetchModel() {
     modelName === ModelComputerVision.COCO_SSD &&
@@ -26,19 +25,16 @@ export default function useCocoSsd({ ready }: IProps) {
         .finally(() => setLoadCoco(false)))
   }
 
-  function disposeModel() {
-    disposeCoco && cocoSsd?.dispose()
-  }
-
   useEffect(() => {
     if (ready) {
       fetchModel()
     }
+
+    if (modelName === ModelComputerVision.EMPTY) {
+      setCocoSsd(null)
+      cocoSsd?.dispose()
+    }
   }, [ready, modelName])
 
-  useEffect(() => {
-    disposeModel()
-  }, [disposeCoco])
-
-  return { cocoSsd, loadCoco, setDisposeCoco }
+  return { cocoSsd, loadCoco }
 }
