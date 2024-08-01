@@ -10,8 +10,11 @@ import {
 import LogoutButton from "../LogoutButton"
 import { Button } from "../ui/button"
 import Image from "next/image"
+import { usePathname, useRouter } from "next/navigation"
 
 export default function HeaderDropdown() {
+  const router = useRouter()
+  const pathname = usePathname()
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -29,7 +32,11 @@ export default function HeaderDropdown() {
       <DropdownMenuContent align="center">
         <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>Paramètres</DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => router.push("/parameter")}
+          disabled={pathname === "/parameter"}>
+          Paramètres
+        </DropdownMenuItem>
         <DropdownMenuItem>Support</DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem>

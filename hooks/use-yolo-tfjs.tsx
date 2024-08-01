@@ -1,5 +1,5 @@
 import { useModelStore } from "@/lib/store/model-store"
-import { yoloLabels } from "@/lib/yolov8n/label"
+import { cocoDataSet } from "@/lib/yolov8n/label"
 import { modelList } from "@/models/model-list"
 import { useEffect, useState } from "react"
 import YOLOTf from "yolo-tfjs"
@@ -21,7 +21,7 @@ export default function useYolodisTfjs({ ready }: IProps) {
   async function fetchModel() {
     modelName &&
       (setLoadModel(true),
-      await YOLOTf.loadYoloModel(modelDef?.url, yoloLabels, {
+      await YOLOTf.loadYoloModel(modelDef?.url, cocoDataSet, {
         yoloVersion: "v8",
         onProgress(fraction: number) {
           setPercentLoaded(fraction * 100)

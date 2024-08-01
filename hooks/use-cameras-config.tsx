@@ -28,11 +28,8 @@ export default function useCamerasConfig() {
       )
       setCameras(videoDevices)
       const cameraToStorage: CameraStored = {
-        noDetectTime: null,
         deviceId: videoDevices[0].deviceId,
         label: videoDevices[0].label,
-        haveDetectionZone: false,
-        detectionZone: null,
       }
       const allCameraStored = getAllCamerasFromLocalStorage()
       console.log("allCameraStored", allCameraStored)

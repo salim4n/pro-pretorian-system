@@ -37,18 +37,17 @@ export default function CameraCard({ camera, index, webcamRefs }: IProps) {
     setStartPos({ x: e.clientX - rect.left, y: e.clientY - rect.top })
   }
 
-  const handleMouseUp = () => {
+  const handleMouseUp = (e: React.MouseEvent) => {
     setIsDrawing(false)
     if (!startPos || !canvasRef.current) return
 
-    const ctx = canvasRef.current.getContext("2d")
-    if (!ctx) return
+    const rect = canvasRef.current.getBoundingClientRect()
+    const endX = e.clientX - rect.left
+    const endY = e.clientY - rect.top
 
-    const currentX = startPos.x
-    const currentY = startPos.y
-    const width = currentX - startPos.x
-    const height = currentY - startPos.y
-
+    const width = Math.abs(endX - startPos.x)
+    const height = Math.abs(endY - startPos.y)
+    console.log("width, height", width, height)
     if (width === 0 && height === 0) {
       const cameraStorage = getCameraByDeviceId(camera.deviceId)
       if (cameraStorage.haveDetectionZone) {
@@ -67,9 +66,10 @@ export default function CameraCard({ camera, index, webcamRefs }: IProps) {
         deviceId: camera.deviceId,
         label: camera.label,
         haveDetectionZone: true,
-        detectionZone: { x: currentX, y: currentY, width, height },
+        detectionZone: { x: startPos.x, y: startPos.y, width, height },
       })
     }
+    setStartPos(null)
   }
 
   const handleMouseMove = (e: React.MouseEvent) => {

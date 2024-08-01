@@ -1,12 +1,12 @@
 export const cameraStorageTitle = "pro-proterian-cameras"
 
 export type CameraStored = {
-  deviceId: string
-  label: string
-  noDetectTime: string
+  deviceId?: string
+  label?: string
+  noDetectTime?: string
   //enabled: boolean
-  haveDetectionZone: boolean
-  detectionZone: { x: number; y: number; width: number; height: number }
+  haveDetectionZone?: boolean
+  detectionZone?: { x: number; y: number; width: number; height: number }
 }
 
 function createCameraStorage() {

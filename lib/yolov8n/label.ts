@@ -1,4 +1,4 @@
-export const yoloLabels = [
+export const cocoDataSet = [
   "person",
   "bicycle",
   "car",

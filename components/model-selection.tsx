@@ -10,9 +10,11 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu"
 import { useModelStore } from "@/lib/store/model-store"
+import { useRouter } from "next/navigation"
 
 export default function ModelSelection() {
   const { modelName, setModel, disposeModel } = useModelStore()
+  const router = useRouter()
 
   return (
     <Card>
@@ -46,11 +48,18 @@ export default function ModelSelection() {
         <Button
           disabled={!modelName}
           variant="outline"
-          className="w-full"
+          className="w-full bg-red-500 hover:bg-red-600 transition-colors"
           onClick={() => disposeModel()}>
           Réinitialiser
         </Button>
       </CardContent>
+
+      <Button
+        variant="link"
+        disabled={!modelName}
+        onClick={() => router.push("parameter/labels-detection")}>
+        Configuration du modèle
+      </Button>
     </Card>
   )
 }

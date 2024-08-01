@@ -16,6 +16,7 @@ import {
 } from "@/lib/data/local-storage/camera-store"
 import { DetectedObject } from "@/lib/identity/definition"
 import Webcam from "react-webcam"
+import { getModelDetectionStorage } from "@/lib/data/local-storage/model-detection-store"
 
 export default function Board({ user }) {
   const ready = useTfjsBackendWeb({ backend: "webgl" })
@@ -43,14 +44,25 @@ export default function Board({ user }) {
 
     const canvasX = x * xRatio
     const canvasY = y * yRatio
-    const canvasDetectionWidth = width * xRatio
-    const canvasDetectionHeight = height * yRatio
+    const canvasWidthDetection = width * xRatio
+    const canvasHeightDetection = height * yRatio
 
-    return (
-      canvasX >= zoneX &&
-      canvasY >= zoneY &&
-      canvasX + canvasDetectionWidth <= zoneX + zoneWidth &&
-      canvasY + canvasDetectionHeight <= zoneY + zoneHeight
+    const zoneRight = zoneX + zoneWidth
+    const zoneBottom = zoneY + zoneHeight
+
+    const detectionPoints = [
+      { x: canvasX, y: canvasY }, // top left
+      { x: canvasX + canvasWidthDetection, y: canvasY }, // top right
+      { x: canvasX, y: canvasY + canvasHeightDetection }, // bottom left
+      { x: canvasX + canvasWidthDetection, y: canvasY + canvasHeightDetection }, // bottom right
+    ]
+
+    return detectionPoints.some(
+      point =>
+        point.x >= zoneX &&
+        point.x <= zoneRight &&
+        point.y >= zoneY &&
+        point.y <= zoneBottom
     )
   }
 
@@ -67,8 +79,13 @@ export default function Board({ user }) {
       webcam.video.offsetWidth,
       webcam.video.offsetHeight
     )
-    console.log(isIn)
-    if (o.class === "person" && isIn) {
+    const detectionStorage = getModelDetectionStorage(
+      ModelComputerVision.COCO_SSD
+    )
+    if (
+      detectionStorage.labelsToDetect.find(label => label.label === o.class) &&
+      isIn
+    ) {
       const body = {
         detected: o,
         picture: webcam.getScreenshot({ width: 640, height: 480 }),
@@ -79,7 +96,12 @@ export default function Board({ user }) {
   }
 
   async function ifDontHaveDetectionZone(o: DetectedObject, webcam: Webcam) {
-    if (o.class === "person") {
+    const detectionStorage = getModelDetectionStorage(
+      ModelComputerVision.COCO_SSD
+    )
+    if (
+      detectionStorage.labelsToDetect.find(label => label.label === o.class)
+    ) {
       const body = {
         detected: o,
         picture: webcam.getScreenshot({ width: 640, height: 480 }),
@@ -94,8 +116,7 @@ export default function Board({ user }) {
       if (webcam !== null && webcam.video?.readyState === 4) {
         const deviceId = (webcam.props.videoConstraints as any).deviceId
         const cameraStorage = getCameraByDeviceId(deviceId)
-        if (cameraStorage.noDetectTime === null) return
-        if (cameraStorage.noDetectTime.length === 8) {
+        if (cameraStorage?.noDetectTime?.length === 8) {
           // check if the time is between the noDetectTime, split by 4 : HHmm - HHmm
           const now = new Date()
           const nowHours = now.getHours()
