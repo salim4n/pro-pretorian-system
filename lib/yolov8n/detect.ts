@@ -1,8 +1,8 @@
 import * as tf from "@tensorflow/tfjs"
 import { renderBoxes } from "./renderBox"
-import { yoloLabels } from "./label"
+import { cocoDataSet } from "./label"
 
-const numClass = yoloLabels.length
+const numClass = cocoDataSet.length
 //commit
 /**
  * Preprocess image / frame before forwarded into the model
