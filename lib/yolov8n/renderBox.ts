@@ -1,4 +1,4 @@
-import { yoloLabels } from "./label"
+import { cocoDataSet } from "./label"
 
 /**
  * Render prediction boxes
@@ -35,7 +35,7 @@ export const renderBoxes = (
 
   for (let i = 0; i < scores_data.length; ++i) {
     // filter based on class threshold
-    const klass = yoloLabels[classes_data[i]]
+    const klass = cocoDataSet[classes_data[i]]
     const color = colors.get(classes_data[i])
     const score = (scores_data[i] * 100).toFixed(1)
 
