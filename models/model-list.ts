@@ -2,6 +2,7 @@ export enum ModelComputerVision {
   COCO_SSD = "Coco SSD",
   DETECTION = "Detection",
   SEGMENTATION = "Segmentation",
+  MEDIAPIPEOBJECTDETECTION = "Efficience Det Lite 0",
   EMPTY = "",
 }
 
@@ -33,5 +34,17 @@ export const modelList: ModelList[] = [
     description:
       "Semantic segmentation model that assigns a label to each pixel in the image.",
     labels: "basic",
+  },
+  {
+    title: ModelComputerVision.MEDIAPIPEOBJECTDETECTION,
+    url: "https://storage.googleapis.com/mediapipe-tasks/object_detector/efficientdet_lite0_uint8.tflite",
+    description:
+      "Object detection model that aims to localize and identify multiple objects in a single image.",
+  },
+  {
+    title: ModelComputerVision.EMPTY,
+    url: "",
+    description: "",
+    labels: "",
   },
 ]

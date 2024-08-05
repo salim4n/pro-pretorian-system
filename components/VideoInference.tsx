@@ -10,14 +10,31 @@ import useYoloTfjs from "@/hooks/use-yolo-tfjs"
 import VideoSelect from "./video-select"
 import { useVideo } from "@/hooks/use-video"
 import VideoReader from "./video-reader"
+import {
+  DELEGATE_CPU,
+  DELEGATE_GPU,
+  RUNNING_MODE_VIDEO,
+} from "@/lib/mediapipe-utils/definitions"
+import useMediapipeDetector from "@/hooks/use-mediapipe-detector"
+import { useModelStore } from "@/lib/store/model-store"
+import drawBoundingBoxes from "@/lib/model-detection/coco-ssd/utils"
+import detectVideo from "@/lib/model-detection/mediapipe/efficience-utils"
+import useInterval from "@/hooks/use-interval"
+import detectYoloVideo from "@/lib/model-detection/yolov8n/utils"
 
 interface IProps {
   user: UserView
 }
 
 export default function VideoInference({ user }: IProps) {
+  const { modelName } = useModelStore()
   const ready = useTfjsBackendWeb({ backend: "webgl" })
   const { cocoSsd, loadCoco } = useCocoSsd({ ready })
+  const { objectDetector, loading } = useMediapipeDetector({
+    runningMode: RUNNING_MODE_VIDEO,
+    scoreThreshold: 0.5,
+    delegate: DELEGATE_CPU,
+  })
   const { model, loadModel, percentLoaded, setDisposeDetect } = useYoloTfjs({
     ready,
   })
@@ -32,7 +49,7 @@ export default function VideoInference({ user }: IProps) {
   }
 
   const handleCreateVideoWithBoundingBox = () => {
-    if (cocoSsd && videoRef.current && canvasRef.current) {
+    if (videoRef.current && canvasRef.current) {
       const video = videoRef.current
       const canvas = canvasRef.current
       const context = canvas.getContext("2d")
@@ -40,32 +57,20 @@ export default function VideoInference({ user }: IProps) {
       canvas.width = video.videoWidth
       canvas.height = video.videoHeight
 
-      const drawBoundingBoxes = async () => {
-        if (video.paused || video.ended) {
-          return
-        }
-        if (context) {
-          context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight)
-          const predictions = await cocoSsd.detect(video)
+      // modelName === ModelComputerVision.COCO_SSD &&
+      //   drawBoundingBoxes(video, context, cocoSsd)
 
-          predictions.forEach(prediction => {
-            const [x, y, width, height] = prediction.bbox
-            context.strokeStyle = "#00FFFF"
-            context.lineWidth = 2
-            context.strokeRect(x, y, width, height)
-            context.font = "16px sans-serif"
-            context.fillStyle = "#00FFFF"
-            context.fillText(
-              `${prediction.class} (${Math.round(prediction.score * 100)}%)`,
-              x,
-              y > 10 ? y - 5 : 10
-            )
-          })
-        }
-        requestAnimationFrame(drawBoundingBoxes)
-      }
+      // modelName === ModelComputerVision.MEDIAPIPEOBJECTDETECTION &&
+      //   detectVideo(video, context, objectDetector)
 
-      video.addEventListener("play", drawBoundingBoxes)
+      video.addEventListener("play", () => {
+        modelName === ModelComputerVision.COCO_SSD &&
+          drawBoundingBoxes(video, context, cocoSsd)
+        modelName === ModelComputerVision.MEDIAPIPEOBJECTDETECTION &&
+          detectVideo(video, context, objectDetector)
+        modelName === ModelComputerVision.DETECTION &&
+          detectYoloVideo(video, context, model)
+      })
     }
   }
 
@@ -87,14 +92,15 @@ export default function VideoInference({ user }: IProps) {
           videoSrc={videoSrc}
           setVideoSrc={setVideoSrc}
         />
-        {loadModel || loadCoco ? (
+        {loadModel || loadCoco || loading ? (
           <ModelLoader
             percent={percentLoaded && percentLoaded}
             model={modelList.find(
               model =>
                 model.title === ModelComputerVision.COCO_SSD ||
                 model.title === ModelComputerVision.DETECTION ||
-                model.title === ModelComputerVision.SEGMENTATION
+                model.title === ModelComputerVision.SEGMENTATION ||
+                model.title === ModelComputerVision.MEDIAPIPEOBJECTDETECTION
             )}
           />
         ) : (

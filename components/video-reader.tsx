@@ -9,7 +9,7 @@ interface IProps {
 export default function VideoReader({ videoRef, canvasRef, videoSrc }: IProps) {
   return (
     <div className="relative w-full overflow-hidden rounded-lg aspect-video">
-      <video ref={videoRef} className="w-full" autoPlay controls>
+      <video ref={videoRef} className="w-full" controls>
         {videoSrc && <source src={videoSrc} type="video/mp4" />}
       </video>
       <canvas

@@ -1,6 +1,6 @@
 import { useModelStore } from "@/lib/store/model-store"
 import { cocoDataSet } from "@/lib/yolov8n/label"
-import { modelList } from "@/models/model-list"
+import { ModelComputerVision, modelList } from "@/models/model-list"
 import { useEffect, useState } from "react"
 import YOLOTf from "yolo-tfjs"
 import * as tf from "@tensorflow/tfjs"
@@ -19,7 +19,7 @@ export default function useYolodisTfjs({ ready }: IProps) {
   const modelDef = modelList.find(model => model.title === modelName)
 
   async function fetchModel() {
-    modelName &&
+    modelName === ModelComputerVision.DETECTION &&
       (setLoadModel(true),
       await YOLOTf.loadYoloModel(modelDef?.url, cocoDataSet, {
         yoloVersion: "v8",
