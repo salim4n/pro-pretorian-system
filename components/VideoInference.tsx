@@ -12,15 +12,13 @@ import { useVideo } from "@/hooks/use-video"
 import VideoReader from "./video-reader"
 import {
   DELEGATE_CPU,
-  DELEGATE_GPU,
   RUNNING_MODE_VIDEO,
 } from "@/lib/mediapipe-utils/definitions"
 import useMediapipeDetector from "@/hooks/use-mediapipe-detector"
 import { useModelStore } from "@/lib/store/model-store"
 import drawBoundingBoxes from "@/lib/model-detection/coco-ssd/utils"
 import detectVideo from "@/lib/model-detection/mediapipe/efficience-utils"
-import useInterval from "@/hooks/use-interval"
-import detectYoloVideo from "@/lib/model-detection/yolov8n/utils"
+import { yolodetectVideo } from "@/lib/yolov8n/detect"
 
 interface IProps {
   user: UserView
@@ -49,28 +47,23 @@ export default function VideoInference({ user }: IProps) {
   }
 
   const handleCreateVideoWithBoundingBox = () => {
-    if (videoRef.current && canvasRef.current) {
-      const video = videoRef.current
-      const canvas = canvasRef.current
-      const context = canvas.getContext("2d")
+    canvasRef.current.width = videoRef.current.videoWidth
+    canvasRef.current.height = videoRef.current.videoHeight
+    if (modelName === ModelComputerVision.DETECTION) {
+      yolodetectVideo(videoRef.current, model, canvasRef, false)
+    } else {
+      if (videoRef.current && canvasRef.current) {
+        const video = videoRef.current
+        const canvas = canvasRef.current
+        const context = canvas.getContext("2d")
 
-      canvas.width = video.videoWidth
-      canvas.height = video.videoHeight
-
-      // modelName === ModelComputerVision.COCO_SSD &&
-      //   drawBoundingBoxes(video, context, cocoSsd)
-
-      // modelName === ModelComputerVision.MEDIAPIPEOBJECTDETECTION &&
-      //   detectVideo(video, context, objectDetector)
-
-      video.addEventListener("play", () => {
-        modelName === ModelComputerVision.COCO_SSD &&
-          drawBoundingBoxes(video, context, cocoSsd)
-        modelName === ModelComputerVision.MEDIAPIPEOBJECTDETECTION &&
-          detectVideo(video, context, objectDetector)
-        modelName === ModelComputerVision.DETECTION &&
-          detectYoloVideo(video, context, model)
-      })
+        video.addEventListener("play", async () => {
+          modelName === ModelComputerVision.COCO_SSD &&
+            drawBoundingBoxes(video, context, cocoSsd)
+          modelName === ModelComputerVision.MEDIAPIPEOBJECTDETECTION &&
+            detectVideo(video, context, objectDetector)
+        })
+      }
     }
   }
 

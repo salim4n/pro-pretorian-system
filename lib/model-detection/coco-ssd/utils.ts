@@ -25,7 +25,6 @@ const drawBoundingBoxes = async (
         y > 10 ? y - 5 : 10
       )
     })
-    console.log("context", context)
   }
   requestAnimationFrame(() => drawBoundingBoxes(video, context, cocoSsd))
 }

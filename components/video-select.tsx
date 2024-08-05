@@ -70,6 +70,9 @@ export default function VideoSelect({
                     canvasRef.current.height
                   )
                 }
+                //remove canvas
+                canvasRef.current.width = 0
+                canvasRef.current.height = 0
               }
             }}
             disabled={!videoSrc}>

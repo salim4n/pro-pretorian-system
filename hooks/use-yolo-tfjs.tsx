@@ -1,8 +1,6 @@
 import { useModelStore } from "@/lib/store/model-store"
-import { cocoDataSet } from "@/lib/yolov8n/label"
 import { ModelComputerVision, modelList } from "@/models/model-list"
 import { useEffect, useState } from "react"
-import YOLOTf from "yolo-tfjs"
 import * as tf from "@tensorflow/tfjs"
 
 interface IProps {
@@ -11,7 +9,10 @@ interface IProps {
 
 export default function useYolodisTfjs({ ready }: IProps) {
   const { modelName } = useModelStore()
-  const [model, setModel] = useState<YOLOTf>(null)
+  const [model, setModel] = useState({
+    net: null,
+    inputShape: [1, 0, 0, 3],
+  }) // init model & input shape
   const [loadModel, setLoadModel] = useState<boolean>(false)
   const [disposeDetect, setDisposeDetect] = useState<boolean>(false)
   const [percentLoaded, setPercentLoaded] = useState<number>(0)
@@ -19,27 +20,36 @@ export default function useYolodisTfjs({ ready }: IProps) {
   const modelDef = modelList.find(model => model.title === modelName)
 
   async function fetchModel() {
-    modelName === ModelComputerVision.DETECTION &&
-      (setLoadModel(true),
-      await YOLOTf.loadYoloModel(modelDef?.url, cocoDataSet, {
-        yoloVersion: "v8",
-        onProgress(fraction: number) {
-          setPercentLoaded(fraction * 100)
+    if (modelName === ModelComputerVision.DETECTION) {
+      setLoadModel(true)
+      const yolov8 = await tf.loadGraphModel(modelDef.url, {
+        onProgress: fractions => {
+          setPercentLoaded(fractions * 100)
         },
-      })
-        .then(model => {
-          setModel(model)
-        })
-        .catch(error => {
-          console.error(error)
-        }))
-
-    setLoadModel(false)
+      }) // load model
+      // warming up model
+      const dummyInput = tf.ones(yolov8.inputs[0].shape)
+      const warmupResults = yolov8.execute(dummyInput)
+      setModel({
+        net: yolov8,
+        inputShape: yolov8.inputs[0].shape,
+      }) // set model & input shape
+      tf.dispose([warmupResults, dummyInput]) // cleanup memory
+      setLoadModel(false)
+    }
   }
 
   useEffect(() => {
     if (ready) {
       fetchModel()
+    }
+
+    if (modelName === ModelComputerVision.EMPTY) {
+      setModel({
+        net: null,
+        inputShape: [1, 0, 0, 3],
+      })
+      model.net?.dispose()
     }
   }, [ready, modelName])
 

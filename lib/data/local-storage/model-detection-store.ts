@@ -1,4 +1,4 @@
-import { cocoDataSet } from "@/lib/yolov8n/label"
+import { cocoDataSet } from "@/lib/model-detection/yolo-test/label"
 import { ModelComputerVision } from "@/models/model-list"
 
 export type LabelToDetect = {

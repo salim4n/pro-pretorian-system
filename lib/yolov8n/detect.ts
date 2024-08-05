@@ -1,6 +1,6 @@
 import * as tf from "@tensorflow/tfjs"
 import { renderBoxes } from "./renderBox"
-import { cocoDataSet } from "./label"
+import { cocoDataSet } from "../model-detection/yolo-test/label"
 
 const numClass = cocoDataSet.length
 //commit
@@ -98,6 +98,8 @@ export const detect = async (source, model, canvasRef, callback = () => {}) => {
   callback()
 
   tf.engine().endScope() // end of scoping
+
+  return { boxes: boxes_data, scores: scores_data, classes: classes_data }
 }
 
 /**
@@ -106,7 +108,12 @@ export const detect = async (source, model, canvasRef, callback = () => {}) => {
  * @param {tf.GraphModel} model loaded YOLOv8 tensorflow.js model
  * @param {HTMLCanvasElement} canvasRef canvas reference
  */
-export const detectVideo = (vidSource, model, canvasRef) => {
+export const yolodetectVideo = (
+  vidSource: any,
+  model: any,
+  canvasRef: any,
+  camMode: boolean
+) => {
   /**
    * Function to detect every frame from video
    */

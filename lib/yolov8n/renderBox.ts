@@ -1,4 +1,4 @@
-import { cocoDataSet } from "./label"
+import { cocoDataSet } from "../model-detection/yolo-test/label"
 
 /**
  * Render prediction boxes
@@ -16,14 +16,8 @@ export const renderBoxes = (
   classes_data: any,
   ratios: any
 ) => {
-  if (!canvasRef.current) {
-    throw new Error("Canvas is not mounted")
-  }
+  const ctx = canvasRef.current.getContext("2d")
 
-  const ctx = canvasRef.current?.getContext("2d")
-  if (!ctx) {
-    throw new Error("Could not get 2D context from canvas")
-  }
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height) // clean canvas
 
   const colors = new Colors()
