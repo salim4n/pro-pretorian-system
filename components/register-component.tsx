@@ -1,6 +1,10 @@
 "use client"
 
-import Image from "next/image"
+import { AuroraBackground } from "./ui/aurora-background"
+import { motion } from "framer-motion"
+import { useTheme } from "next-themes"
+import { Meteors } from "./ui/meteors"
+import { BlurIn } from "./ui/text-blur"
 import { Input } from "./ui/input"
 import { Button } from "./ui/button"
 import {
@@ -52,6 +56,8 @@ export const signupFormSchema = z.object({
 // })
 
 export default function RegisterComponent() {
+  const { theme } = useTheme()
+  const [buttonHover, setButtonHover] = useState(false)
   const form = useForm<z.infer<typeof signupFormSchema>>({
     resolver: zodResolver(signupFormSchema),
   })
@@ -90,80 +96,99 @@ export default function RegisterComponent() {
   }
 
   return (
-    <div className="w-full lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px] gradient">
-      <div className="flex items-center justify-center py-12">
-        <div className="mx-auto grid w-[350px] gap-6">
-          <div className="grid gap-2 text-center">
-            <h1 className="text-3xl font-bold">Pretorian System Security</h1>
-            <p className="text-balance text-muted-foreground">
-              S'inscrire pour continuer
-            </p>
-          </div>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nom</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Votre nom..." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="surname"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Prénom</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Votre prénom..." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        autoComplete="username"
-                        placeholder="Votre email..."
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Mot de passe</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        autoComplete="new-password"
-                        placeholder="Votre mot de passe..."
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {/* <FormField
+    <AuroraBackground>
+      <motion.div
+        initial={{ opacity: 0.0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{
+          delay: 0.3,
+          duration: 0.8,
+          ease: "easeInOut",
+        }}
+        className="relative flex flex-col gap-4 items-center justify-center px-4"></motion.div>
+      {buttonHover && <Meteors number={30} />}
+      <div
+        className="mx-auto grid w-[350px] gap-6 z-10"
+        onMouseEnter={() => setButtonHover(true)}
+        onMouseLeave={() => setButtonHover(false)}>
+        <div className="w-full lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px] gradient">
+          <div className="flex items-center justify-center py-12">
+            <div className="mx-auto grid w-[350px] gap-6">
+              <div className="grid gap-2 text-center">
+                <h1 className="text-3xl font-bold">
+                  Pretorian System Security
+                </h1>
+                <p className="text-balance text-muted-foreground">
+                  S'inscrire pour continuer
+                </p>
+              </div>
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-8">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nom</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Votre nom..." {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="surname"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Prénom</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Votre prénom..." {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            autoComplete="username"
+                            placeholder="Votre email..."
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Mot de passe</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="password"
+                            autoComplete="new-password"
+                            placeholder="Votre mot de passe..."
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {/* <FormField
                                 control={form.control}
                                 name="confirmPassword"
                                 render={({ field }) => (
@@ -235,23 +260,15 @@ export default function RegisterComponent() {
                                 )}
                             /> */}
 
-              <Button type="submit" disabled={loading}>
-                {loading ? "Chargement..." : "S'inscrire"}
-              </Button>
-            </form>
-          </Form>
+                  <Button type="submit" disabled={loading}>
+                    {loading ? "Chargement..." : "S'inscrire"}
+                  </Button>
+                </form>
+              </Form>
+            </div>
+          </div>
         </div>
       </div>
-
-      <div className="hidden bg-muted lg:block">
-        <Image
-          src="/icon.jpeg"
-          alt="Image"
-          width="1920"
-          height="1080"
-          className="h-full w-full object-cover"
-        />
-      </div>
-    </div>
+    </AuroraBackground>
   )
 }

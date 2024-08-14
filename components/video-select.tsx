@@ -44,7 +44,7 @@ export default function VideoSelect({
             variant="outline"
             onClick={handleCreateVideoWithBoundingBox}
             disabled={!modelName || !videoSrc}
-            className="w-full">
+            className="w-full cursor-pointer">
             Traiter la vidéo
           </Button>
           <Button

@@ -9,11 +9,12 @@ import { format } from "date-fns"
 import { CalendarIcon, LucideTrash2 } from "lucide-react"
 import { DateRange } from "react-day-picker"
 import { Dispatch, SetStateAction } from "react"
+import { PictureStored } from "@/lib/send-detection/action"
 
 interface IProps {
   date: DateRange
   setDate: Dispatch<SetStateAction<DateRange>>
-  pictures?: string[]
+  pictures?: PictureStored[]
   handleDeleteAllSelection: () => void
 }
 

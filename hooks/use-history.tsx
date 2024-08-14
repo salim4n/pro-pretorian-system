@@ -1,5 +1,5 @@
 import { UserView } from "@/lib/identity/definition"
-import { getPictures } from "@/lib/send-detection/action"
+import { PictureStored, getPictures } from "@/lib/send-detection/action"
 import { addDays } from "date-fns"
 import { useEffect, useState } from "react"
 import { DateRange } from "react-day-picker"
@@ -16,14 +16,14 @@ export default function useHistory({ user }: IProps) {
     from: new Date(actualYear, actualMonth, 1),
     to: addDays(new Date(actualYear, actualMonth, 1), 6),
   })
-  const [pictures, setPictures] = useState<string[]>([])
+  const [blobs, setBlobs] = useState<PictureStored[]>([])
 
   const fetchPicturesFromRange = async () => {
     if (date && date.from && date.to) {
       const fromDateStr = date.from.toISOString()
       const toDateStr = date.to.toISOString()
-      const pictures = await getPictures(fromDateStr, toDateStr, user.container)
-      setPictures(pictures)
+      const blobs = await getPictures(fromDateStr, toDateStr, user.container)
+      setBlobs(blobs)
     }
   }
 
@@ -31,5 +31,5 @@ export default function useHistory({ user }: IProps) {
     fetchPicturesFromRange()
   }, [date])
 
-  return { pictures, setPictures, date, setDate }
+  return { blobs, setBlobs, date, setDate }
 }

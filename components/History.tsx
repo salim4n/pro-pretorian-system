@@ -18,14 +18,9 @@ interface IProps {
 }
 
 export default function History({ user }: IProps) {
-  const ready = useTfjsBackendWeb({ backend: "webgl" })
   const [loading, setLoading] = useState<boolean>(false)
-  const { pictures, setPictures, date, setDate } = useHistory({ user })
+  const { blobs, setBlobs, date, setDate } = useHistory({ user })
   const [isDeleting, setIsDeleting] = useState<boolean>(false)
-  const canvasRefs = useRef<HTMLCanvasElement[]>([])
-  const { cocoSsd, loadCoco } = useCocoSsd({ ready })
-
-  usePredictHistory({ cocoSsd, pictures, canvasRefs })
 
   async function handleDeleteAllSelection() {
     const confirmation = window.confirm(
@@ -37,7 +32,9 @@ export default function History({ user }: IProps) {
       setIsDeleting(true)
       await deletePictures(date.from, date.to, user.container)
         .then(_res => {
-          setPictures([])
+          setBlobs([])
+          setLoading(false)
+          setIsDeleting(false)
         })
         .catch(error => {
           setLoading(false)
@@ -46,23 +43,16 @@ export default function History({ user }: IProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-8 mt-10">
-      {loadCoco ? (
-        <ModelLoader
-          model={modelList.find(
-            model => model.title === ModelComputerVision.COCO_SSD
-          )}
+    <>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-8 mt-10">
+        <HistorySelect
+          date={date}
+          setDate={setDate}
+          pictures={blobs}
+          handleDeleteAllSelection={handleDeleteAllSelection}
         />
-      ) : (
-        <ModelSelection />
-      )}
-      <HistorySelect
-        date={date}
-        setDate={setDate}
-        pictures={pictures}
-        handleDeleteAllSelection={handleDeleteAllSelection}
-      />
-      <DisplayHistory pictures={pictures} canvasRefs={canvasRefs} />
-    </div>
+      </div>
+      <DisplayHistory pictures={blobs} />
+    </>
   )
 }

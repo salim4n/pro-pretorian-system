@@ -1,9 +1,10 @@
+import { PictureStored } from "@/lib/send-detection/action"
 import { ObjectDetection } from "@tensorflow-models/coco-ssd"
 import { useEffect } from "react"
 
 interface IProps {
   cocoSsd: ObjectDetection
-  pictures: string[]
+  pictures: PictureStored[]
   canvasRefs: React.MutableRefObject<HTMLCanvasElement[]>
 }
 
@@ -17,7 +18,7 @@ export default function usePredictHistory({
       pictures.forEach((picture, index) => {
         const img = new window.Image()
         img.crossOrigin = "anonymous"
-        img.src = picture
+        img.src = picture.url
         img.onload = () => {
           const canvas = canvasRefs.current[index]
           const context = canvas?.getContext("2d")
