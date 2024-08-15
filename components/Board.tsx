@@ -1,7 +1,7 @@
 "use client"
 
 import { type ObjectDetection } from "@tensorflow-models/coco-ssd"
-import { Detected, sendPicture } from "@/lib/send-detection/action"
+import { sendPicture } from "@/lib/send-detection/action"
 import { useTfjsBackendWeb } from "@/hooks/use-tfjs-backend"
 import useCocoSsd from "@/hooks/use-cocossd"
 import ModelSelection from "./model-selection"
@@ -68,46 +68,59 @@ export default function Board({ user }) {
 
   async function ifHaveDetectionZone(
     cameraStorage: CameraStored,
-    o: DetectedObject,
+    objDetected: DetectedObject[],
     webcam: Webcam
   ) {
-    const isIn = isDetectionInZone(
-      o.bbox,
-      cameraStorage.detectionZone,
-      webcam.video.videoWidth,
-      webcam.video.videoHeight,
-      webcam.video.offsetWidth,
-      webcam.video.offsetHeight
-    )
+    let isIn = false
+    for (const o of objDetected) {
+      isIn = isDetectionInZone(
+        o.bbox,
+        cameraStorage.detectionZone,
+        webcam.video.videoWidth,
+        webcam.video.videoHeight,
+        webcam.video.offsetWidth,
+        webcam.video.offsetHeight
+      )
+      if (isIn) {
+        break
+      }
+    }
     const detectionStorage = getModelDetectionStorage(
       ModelComputerVision.COCO_SSD
     )
     if (
-      detectionStorage.labelsToDetect.find(label => label.label === o.class) &&
+      objDetected.find(o =>
+        detectionStorage.labelsToDetect.find(label => label.label === o.class)
+      ) &&
       isIn
     ) {
       const body = {
-        detected: o,
+        detected: objDetected,
         picture: webcam.getScreenshot({ width: 640, height: 480 }),
       }
       console.log("body", body)
-      await sendPicture(body as Detected, user)
+      await sendPicture(body, user)
     }
   }
 
-  async function ifDontHaveDetectionZone(o: DetectedObject, webcam: Webcam) {
+  async function ifDontHaveDetectionZone(
+    objDetected: DetectedObject[],
+    webcam: Webcam
+  ) {
     const detectionStorage = getModelDetectionStorage(
       ModelComputerVision.COCO_SSD
     )
     if (
-      detectionStorage.labelsToDetect.find(label => label.label === o.class)
+      objDetected.find(o =>
+        detectionStorage.labelsToDetect.find(label => label.label === o.class)
+      )
     ) {
       const body = {
-        detected: o,
+        detected: objDetected,
         picture: webcam.getScreenshot({ width: 640, height: 480 }),
       }
       console.log("body", body)
-      await sendPicture(body as Detected, user)
+      await sendPicture(body, user)
     }
   }
 
@@ -128,14 +141,12 @@ export default function Board({ user }) {
             return
           }
         }
-        const objectDetected = await net.detect(webcam.video, undefined, 0.5)
-        objectDetected.forEach(async o => {
-          if (cameraStorage.detectionZone !== null) {
-            ifHaveDetectionZone(cameraStorage, o, webcam)
-          } else {
-            ifDontHaveDetectionZone(o, webcam)
-          }
-        })
+        const objectDetected = await net.detect(webcam.video, undefined, 0.1)
+        if (cameraStorage.detectionZone !== null) {
+          ifHaveDetectionZone(cameraStorage, objectDetected, webcam)
+        } else {
+          ifDontHaveDetectionZone(objectDetected, webcam)
+        }
       }
     })
   }

@@ -9,12 +9,17 @@ import {
   CardTitle,
 } from "./ui/card"
 import { DialogClose } from "@radix-ui/react-dialog"
+import { PictureStored } from "@/lib/send-detection/action"
 
-export default function ModalHistory() {
+interface IProps {
+  pic: PictureStored
+}
+
+export default function ModalHistory({ pic }: IProps) {
   const canvasRef = createRef<HTMLCanvasElement>()
 
   return (
-    <Card className="w-full max-w-2xl">
+    <Card className="w-full h-full">
       <CardHeader className="bg-muted/50">
         <CardTitle>Object Detection</CardTitle>
         <CardDescription>
@@ -24,12 +29,12 @@ export default function ModalHistory() {
       <CardContent className="p-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <img
-            src="https://fakeimg.pl/350x200/?text=Fake&font=lobster"
+            src={pic.url}
             alt="Selected Image"
-            width={400}
-            height={400}
-            className="w-full h-64 object-cover rounded-lg"
-            style={{ aspectRatio: "400/400", objectFit: "cover" }}
+            width={1280}
+            height={1280}
+            className="w-full h-auto object-cover rounded-lg"
+            style={{ aspectRatio: "1280/1280", objectFit: "cover" }}
           />
           <div className="flex flex-col gap-4">
             <div className="bg-muted rounded-lg p-4">

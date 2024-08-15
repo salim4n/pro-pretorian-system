@@ -10,11 +10,42 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu"
 import { useModelStore } from "@/lib/store/model-store"
-import { useRouter } from "next/navigation"
+import MultipleSelector, { Option } from "./ui/multiple-select"
+import useModelDetectionStorage from "@/hooks/use-model-detection-storage"
+import { useEffect, useState } from "react"
+import LabelDetection from "./label-detection"
+import { Label } from "./ui/label"
 
 export default function ModelSelection() {
   const { modelName, setModel, disposeModel } = useModelStore()
-  const router = useRouter()
+  const [options, setOptions] = useState<Option[]>([])
+  const { labelsToDetect, setLabelsToDetect } = useModelDetectionStorage({
+    modelName,
+  })
+
+  useEffect(() => {
+    if (modelName === ModelComputerVision.EMPTY) {
+      setOptions([])
+    }
+    const options: Option[] = labelsToDetect.map(label => {
+      return {
+        value: label.label,
+        label: label.label,
+      } as Option
+    })
+    setOptions(options)
+  }, [labelsToDetect])
+
+  function getDefaultValue() {
+    return labelsToDetect
+      .filter(label => label.toDetect)
+      .map(label => {
+        return {
+          value: label.label,
+          label: label.label,
+        } as Option
+      })
+  }
 
   return (
     <Card>
@@ -53,13 +84,32 @@ export default function ModelSelection() {
           Réinitialiser
         </Button>
       </CardContent>
-
-      <Button
-        variant="link"
-        disabled={!modelName}
-        onClick={() => router.push("parameter/labels-detection")}>
-        Configuration du modèle
-      </Button>
+      <CardContent className="p-6">
+        <Label>Labels à détecter</Label>
+        <MultipleSelector
+          disabled={!modelName}
+          options={options && options}
+          value={getDefaultValue()}
+          className=" bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm "
+          emptyIndicator={
+            <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">
+              Aucun label à détecter
+            </p>
+          }
+          onChange={(selectedOptions: Option[]) => {
+            const labels = labelsToDetect.map(label => {
+              return {
+                label: label.label,
+                toDetect: selectedOptions.some(
+                  selectedOption => selectedOption.value === label.label
+                ),
+              }
+            })
+            console.log("labels", labels)
+            setLabelsToDetect(labels)
+          }}
+        />
+      </CardContent>
     </Card>
   )
 }

@@ -1,16 +1,10 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useState } from "react"
 import { UserView } from "@/lib/identity/definition"
 import { deletePictures } from "@/lib/send-detection/action"
 import useHistory from "@/hooks/use-history"
-import useCocoSsd from "@/hooks/use-cocossd"
-import { useTfjsBackendWeb } from "@/hooks/use-tfjs-backend"
-import ModelLoader from "./model-loader"
-import { ModelComputerVision, modelList } from "@/models/model-list"
 import HistorySelect from "./history-select"
-import ModelSelection from "./model-selection"
-import usePredictHistory from "@/hooks/use-predict-history"
 import DisplayHistory from "./display-history"
 
 interface IProps {

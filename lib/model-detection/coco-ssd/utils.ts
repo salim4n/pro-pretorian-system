@@ -11,7 +11,7 @@ const drawBoundingBoxes = async (
   if (context) {
     context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight)
     let predictions = []
-    predictions = await cocoSsd.detect(video)
+    predictions = await cocoSsd.detect(video, undefined, 0.1)
     predictions.forEach(prediction => {
       const [x, y, width, height] = prediction.bbox
       context.strokeStyle = "#00FFFF"

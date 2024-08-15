@@ -1,5 +1,7 @@
+"use client"
+
 import Webcam from "react-webcam"
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
+import { Card, CardContent, CardHeader } from "./ui/card"
 import { useEffect, useRef, useState } from "react"
 import {
   getCameraByDeviceId,
@@ -12,6 +14,8 @@ import {
   InputOTPSlot,
 } from "./ui/input-otp"
 import { Badge } from "./ui/badge"
+import { useModelStore } from "@/lib/store/model-store"
+import { ModelComputerVision } from "@/models/model-list"
 
 interface IProps {
   camera: MediaDeviceInfo
@@ -21,6 +25,7 @@ interface IProps {
 
 export default function CameraCard({ camera, index, webcamRefs }: IProps) {
   const [isDrawing, setIsDrawing] = useState(false)
+  const { modelName } = useModelStore()
   const [startPos, setStartPos] = useState<any>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [otpTime, setOtpTime] = useState(() => {
@@ -112,6 +117,11 @@ export default function CameraCard({ camera, index, webcamRefs }: IProps) {
   return (
     <Card key={index} className="flex flex-col items-center mt-5">
       <CardHeader>
+        <Badge
+          className="mr-2 rounded-full"
+          variant={
+            modelName === ModelComputerVision.EMPTY ? "destructive" : "default"
+          }></Badge>
         <h4>Heure sans detections</h4>
       </CardHeader>
       <CardContent>
@@ -149,6 +159,13 @@ export default function CameraCard({ camera, index, webcamRefs }: IProps) {
             <InputOTPSlot index={7} />
           </InputOTPGroup>
         </InputOTP>
+      </CardContent>
+      <CardContent>
+        {getCameraByDeviceId(camera.deviceId).haveDetectionZone && (
+          <Badge className="m-3">
+            <strong>Zone de detections Active</strong>
+          </Badge>
+        )}
       </CardContent>
       <CardContent>
         <div className="relative">

@@ -36,7 +36,7 @@ const blobServiceClient = new BlobServiceClient(
 )
 
 export type Detected = {
-  detected: DetectedObject
+  detected: DetectedObject[]
   picture?: string
 }
 
@@ -44,7 +44,7 @@ export type PictureStored = {
   url: string
   created: Date
   hour?: string
-  detectedClass?: string
+  detected: DetectedObject[]
 }
 
 export async function getPictures(
@@ -63,7 +63,7 @@ export async function getPictures(
     const item: PictureStored = {
       url: blob.name,
       created: date,
-      detectedClass: blob.metadata.class,
+      detected: JSON.parse(blob.metadata.predictions),
     }
     blobsArray.push(item)
   }
@@ -79,8 +79,8 @@ export async function getPictures(
       return {
         url: imageUrl,
         created: blob.created,
-        detectedClass: blob.detectedClass,
         hour: blob.created.toLocaleTimeString(),
+        detected: blob.detected,
       } as PictureStored
     })
   )
@@ -88,7 +88,10 @@ export async function getPictures(
   return pictures
 }
 
-export async function sendPicture(body: Detected, user: UserView) {
+export async function sendPicture(
+  body: Detected,
+  user: UserView
+): Promise<void> {
   try {
     const picture = body.picture
     const base64Data =
@@ -97,17 +100,16 @@ export async function sendPicture(body: Detected, user: UserView) {
     const blobName = `${uuidv4()}.png`
     const containerClient = blobServiceClient.getContainerClient(user.container)
     const blockBlobClient = containerClient.getBlockBlobClient(blobName)
+    const metadata = JSON.stringify(body.detected)
     buffer &&
       (await blockBlobClient.upload(buffer, buffer.length, {
         blobHTTPHeaders: { blobContentType: "image/png" },
       }))
-    await blockBlobClient.setMetadata({ class: body.detected.class })
+    await blockBlobClient.setMetadata({ predictions: metadata })
     const imageUrl = await generateSasToken(user.container, blobName)
-    const message = `Detection : ${
-      body.detected.class
-    }, Confidence: ${body.detected.score.toPrecision(
-      2
-    )} % \n Image: ${imageUrl}`
+    const message = `Detection(s) found: ${body.detected.map(
+      d => d.class
+    )}. Picture: ${imageUrl}`
     await sendDetection(user.chatid, message)
   } catch (e) {
     console.error(e)
@@ -118,7 +120,7 @@ export async function downloadPictures(
   dateFrom: string | number | Date,
   dateTo: string | number | Date,
   container: string
-) {
+): Promise<string[]> {
   const containerClient = blobServiceClient.getContainerClient(container)
   const blobs = containerClient.listBlobsFlat()
   const blobsArray = []
@@ -148,7 +150,7 @@ export async function deletePictures(
   dateFrom: string | number | Date,
   dateTo: string | number | Date,
   container: string
-) {
+): Promise<number> {
   const containerClient = blobServiceClient.getContainerClient(container)
   const blobs = containerClient.listBlobsFlat()
   const blobsArray = []

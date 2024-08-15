@@ -37,10 +37,8 @@ export default function useMediapipeDetector({
       const vision = await FilesetResolver.forVisionTasks(VISION_URL)
       const objDetector = await ObjectDetector.createFromOptions(vision, {
         baseOptions: {
-          modelAssetPath: modelList.find(
-            model =>
-              model.title === ModelComputerVision.MEDIAPIPEOBJECTDETECTION
-          ).url,
+          modelAssetPath: modelList.find(model => model.title === model.title)
+            .url,
           delegate: delegate === DELEGATE_GPU ? DELEGATE_GPU : DELEGATE_CPU,
         },
         scoreThreshold: scoreThreshold,
@@ -56,7 +54,7 @@ export default function useMediapipeDetector({
   }
 
   useEffect(() => {
-    if (modelName === ModelComputerVision.MEDIAPIPEOBJECTDETECTION) {
+    if (modelName === ModelComputerVision.EMPTY) {
       getDetector()
     } else {
       setObjectDetector(null)

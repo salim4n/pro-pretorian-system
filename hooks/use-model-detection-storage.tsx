@@ -4,7 +4,7 @@ import {
   createModelDetectionStorage,
 } from "@/lib/data/local-storage/model-detection-store"
 import { ModelComputerVision } from "@/models/model-list"
-import { use, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 
 export default function useModelDetectionStorage({
   modelName,

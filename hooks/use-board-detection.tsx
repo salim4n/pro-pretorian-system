@@ -1,6 +1,5 @@
 import { ObjectDetection } from "@tensorflow-models/coco-ssd"
-import { useEffect, useRef, useState } from "react"
-import Webcam from "react-webcam"
+import { useEffect } from "react"
 
 interface IProps {
   ready: boolean
