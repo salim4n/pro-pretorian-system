@@ -15,7 +15,7 @@ export default function useModelDetectionStorage({
   const [labelToDetect, setLabelToDetect] = useState<LabelToDetect>()
 
   function getLabelsStoragesOrCreate() {
-    Object.keys(ModelComputerVision).forEach(key => {
+    Object.values(ModelComputerVision).forEach(key => {
       const storage = localStorage.getItem(`${key}`)
       if (!storage) {
         createModelDetectionStorage()

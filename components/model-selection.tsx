@@ -13,7 +13,6 @@ import { useModelStore } from "@/lib/store/model-store"
 import MultipleSelector, { Option } from "./ui/multiple-select"
 import useModelDetectionStorage from "@/hooks/use-model-detection-storage"
 import { useEffect, useState } from "react"
-import LabelDetection from "./label-detection"
 import { Label } from "./ui/label"
 
 export default function ModelSelection() {

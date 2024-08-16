@@ -16,7 +16,11 @@ import {
 } from "@/lib/data/local-storage/camera-store"
 import { DetectedObject } from "@/lib/identity/definition"
 import Webcam from "react-webcam"
-import { getModelDetectionStorage } from "@/lib/data/local-storage/model-detection-store"
+import {
+  LabelToDetect,
+  ModelDetectionStore,
+  getModelDetectionStorage,
+} from "@/lib/data/local-storage/model-detection-store"
 
 export default function Board({ user }) {
   const ready = useTfjsBackendWeb({ backend: "webgl" })
@@ -111,15 +115,23 @@ export default function Board({ user }) {
       ModelComputerVision.COCO_SSD
     )
     if (
-      objDetected.find(o =>
-        detectionStorage.labelsToDetect.find(label => label.label === o.class)
+      objDetected.find((od: DetectedObject) =>
+        detectionStorage.labelsToDetect.find(
+          (ltd: LabelToDetect) => ltd.label === od.class && ltd.toDetect
+        )
       )
     ) {
+      console.log("detected", objDetected)
+      console.log(
+        "is in labels to detect",
+        detectionStorage.labelsToDetect.find(
+          (ltd: LabelToDetect) => ltd.toDetect
+        )
+      )
       const body = {
         detected: objDetected,
         picture: webcam.getScreenshot({ width: 640, height: 480 }),
       }
-      console.log("body", body)
       await sendPicture(body, user)
     }
   }
@@ -141,6 +153,7 @@ export default function Board({ user }) {
             return
           }
         }
+        console.log("detecting")
         const objectDetected = await net.detect(webcam.video, undefined, 0.1)
         if (cameraStorage.detectionZone !== null) {
           ifHaveDetectionZone(cameraStorage, objectDetected, webcam)
