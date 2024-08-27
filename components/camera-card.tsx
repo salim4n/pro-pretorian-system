@@ -115,86 +115,86 @@ export default function CameraCard({ camera, index, webcamRefs }: IProps) {
   }, [camera])
 
   return (
-    <Card key={index} className="flex flex-col items-center mt-5">
-      <CardHeader>
-        <Badge
-          className="mr-2 rounded-full"
-          variant={
-            modelName === ModelComputerVision.EMPTY ? "destructive" : "default"
-          }></Badge>
-        <h4>Heure sans detections</h4>
-      </CardHeader>
-      <CardContent>
-        <InputOTP
-          maxLength={8}
-          value={otpTime}
-          onChange={value => {
-            setOtpTime(value)
-            const thisCam = getCameraByDeviceId(camera.deviceId)
-            updateCameraInLocalStorage(index, {
-              noDetectTime: value.length === 8 ? value : null,
-              deviceId: camera.deviceId,
-              label: camera.label,
-              haveDetectionZone: thisCam.haveDetectionZone,
-              detectionZone: thisCam.detectionZone,
-            })
-          }}>
-          <InputOTPGroup>
-            <InputOTPSlot index={0} />
-            <InputOTPSlot index={1} />
-            <Badge>
-              <strong>H</strong>
-            </Badge>
-            <InputOTPSlot index={2} />
-            <InputOTPSlot index={3} />
-          </InputOTPGroup>
-          <InputOTPSeparator />
-          <InputOTPGroup>
-            <InputOTPSlot index={4} />
-            <InputOTPSlot index={5} />
-            <Badge>
-              <strong>H</strong>
-            </Badge>
-            <InputOTPSlot index={6} />
-            <InputOTPSlot index={7} />
-          </InputOTPGroup>
-        </InputOTP>
-      </CardContent>
-      <CardContent>
-        {getCameraByDeviceId(camera.deviceId).haveDetectionZone && (
-          <Badge className="m-3">
-            <strong>Zone de detections Active</strong>
-          </Badge>
-        )}
-      </CardContent>
-      <CardContent>
-        <div className="relative">
-          <Webcam
-            audio={false}
-            videoConstraints={{
-              deviceId: camera.deviceId,
-            }}
-            ref={el => {
-              if (el) {
-                webcamRefs.current[index] = el
-              }
-            }}
-            key={index}
-            width={640}
-            height={480}
-            className="m-1 rounded-md border-gray-500 border-2"
-          />
-          <canvas
-            ref={canvasRef}
-            width={640}
-            height={480}
-            className="absolute top-0 left-0 z-10 cursor-crosshair"
-            onMouseDown={handleMouseDown}
-            onMouseUp={handleMouseUp}
-            onMouseMove={handleMouseMove}
-          />
-        </div>
-      </CardContent>
-    </Card>
-  )
+		<Card key={index} className="flex flex-col items-center mt-5">
+			<CardHeader>
+				<Badge
+					className="mr-2 rounded-full"
+					variant={
+						modelName === ModelComputerVision.EMPTY ? "destructive" : "default"
+					}></Badge>
+				<h4>Heure sans detections</h4>
+			</CardHeader>
+			<CardContent>
+				<InputOTP
+					maxLength={8}
+					value={otpTime}
+					onChange={(value) => {
+						setOtpTime(value);
+						const thisCam = getCameraByDeviceId(camera.deviceId);
+						updateCameraInLocalStorage(index, {
+							noDetectTime: value.length === 8 ? value : null,
+							deviceId: camera.deviceId,
+							label: camera.label,
+							haveDetectionZone: thisCam.haveDetectionZone,
+							detectionZone: thisCam.detectionZone,
+						});
+					}}>
+					<InputOTPGroup>
+						<InputOTPSlot index={0} />
+						<InputOTPSlot index={1} />
+						<Badge>
+							<strong>H</strong>
+						</Badge>
+						<InputOTPSlot index={2} />
+						<InputOTPSlot index={3} />
+					</InputOTPGroup>
+					<InputOTPSeparator />
+					<InputOTPGroup>
+						<InputOTPSlot index={4} />
+						<InputOTPSlot index={5} />
+						<Badge>
+							<strong>H</strong>
+						</Badge>
+						<InputOTPSlot index={6} />
+						<InputOTPSlot index={7} />
+					</InputOTPGroup>
+				</InputOTP>
+			</CardContent>
+			<CardContent>
+				{getCameraByDeviceId(camera.deviceId).haveDetectionZone && (
+					<Badge className="m-3">
+						<strong>Zone de detections Active</strong>
+					</Badge>
+				)}
+			</CardContent>
+			<CardContent>
+				<div className="relative">
+					<Webcam
+						audio={false}
+						videoConstraints={{
+							deviceId: camera.deviceId,
+						}}
+						ref={(el) => {
+							if (el) {
+								webcamRefs.current[index] = el;
+							}
+						}}
+						key={index}
+						width={640}
+						height={640}
+						className="m-1 rounded-md border-gray-500 border-2"
+					/>
+					<canvas
+						ref={canvasRef}
+						width={640}
+						height={640}
+						className="absolute top-0 left-0 z-10 cursor-crosshair"
+						onMouseDown={handleMouseDown}
+						onMouseUp={handleMouseUp}
+						onMouseMove={handleMouseMove}
+					/>
+				</div>
+			</CardContent>
+		</Card>
+	);
 }

@@ -34,21 +34,15 @@ export const renderBoxes = (
     const score = (scores_data[i] * 100).toFixed(1)
 
     let [y1, x1, y2, x2] = boxes_data.slice(i * 4, (i + 1) * 4)
-    // x1 *= ratios[0]
-    // x2 *= ratios[0]
-    // y1 *= ratios[1]
-    // y2 *= ratios[1]
-    const width = x2 - x1
-    const height = y2 - y1
+    x1 *= ratios[0];
+		x2 *= ratios[0];
+		y1 *= ratios[1];
+		y2 *= ratios[1];
 
-    // draw box.
-    ctx.fillStyle = Colors.hexToRgba(color, 0.2)
-    ctx.fillRect(x1, y1, width, height)
-
-    // draw border box.
-    ctx.strokeStyle = color
-    ctx.lineWidth = 2
-    ctx.strokeRect(x1, y1, width, height)
+		// Draw the box
+		ctx.strokeStyle = color;
+		ctx.lineWidth = 2;
+		ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
 
     // Draw the label background.
     ctx.fillStyle = color
