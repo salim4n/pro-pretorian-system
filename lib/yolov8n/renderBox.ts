@@ -9,56 +9,60 @@ import { cocoDataSet } from "../model-detection/yolo-test/label"
  * @param {Array[Number]} ratios boxes ratio [xRatio, yRatio]
  */
 export const renderBoxes = (
-  source: any,
-  canvasRef: React.MutableRefObject<HTMLCanvasElement>,
+  context: CanvasRenderingContext2D,
   boxes_data: number[],
-  scores_data: any,
-  classes_data: any,
-  ratios: any
+  scores_data: number[],
+  classes_data: number[],
+  ratios: number[]
 ) => {
-  const ctx = canvasRef.current.getContext("2d")
-
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height) // clean canvas
+  context.clearRect(0, 0, context.canvas.width, context.canvas.height) // clean canvas
 
   const colors = new Colors()
 
   // font configs
-  const font = "16px sans-serif"
-  ctx.font = font
-  ctx.textBaseline = "top"
+  const font = `${Math.max(
+    Math.round(Math.max(context.canvas.width, context.canvas.height) / 40),
+    14
+  )}px Arial`
+  context.font = font
+  context.textBaseline = "top"
 
   for (let i = 0; i < scores_data.length; ++i) {
     // filter based on class threshold
-    const klass = cocoDataSet[classes_data[i]]
+    const klass = cocoDataSet[classes_data[i]] || "unknown"
     const color = colors.get(classes_data[i])
     const score = (scores_data[i] * 100).toFixed(1)
 
     let [y1, x1, y2, x2] = boxes_data.slice(i * 4, (i + 1) * 4)
-    x1 *= ratios[0];
-		x2 *= ratios[0];
-		y1 *= ratios[1];
-		y2 *= ratios[1];
-
-		// Draw the box
-		ctx.strokeStyle = color;
-		ctx.lineWidth = 2;
-		ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
+    x1 *= ratios[0]
+    x2 *= ratios[0]
+    y1 *= ratios[1]
+    y2 *= ratios[1]
+    const width = x2 - x1
+    const height = y2 - y1
+    // draw border box.
+    context.strokeStyle = color
+    context.lineWidth = Math.max(
+      Math.min(context.canvas.width, context.canvas.height) / 200,
+      2.5
+    )
+    context.strokeRect(x1, y1, width, height)
 
     // Draw the label background.
-    ctx.fillStyle = color
-    const textWidth = ctx.measureText(klass + " - " + score + "%").width
+    context.fillStyle = color
+    const textWidth = context.measureText(klass + " - " + score + "%").width
     const textHeight = parseInt(font, 10) // base 10
-    const yText = y1 - (textHeight + ctx.lineWidth)
-    ctx.fillRect(
+    const yText = y1 - (textHeight + context.lineWidth)
+    context.fillRect(
       x1 - 1,
       yText < 0 ? 0 : yText, // handle overflow label box
-      textWidth + ctx.lineWidth,
-      textHeight + ctx.lineWidth
+      textWidth + context.lineWidth,
+      textHeight + context.lineWidth
     )
 
     // Draw labels
-    ctx.fillStyle = "#ffffff"
-    ctx.fillText(klass + " - " + score + "%", x1 - 1, yText < 0 ? 0 : yText)
+    context.fillStyle = "#ffffff"
+    context.fillText(klass + " - " + score + "%", x1 - 1, yText < 0 ? 0 : yText)
   }
 }
 

@@ -22,6 +22,7 @@ import { useState } from "react"
 import { signup } from "@/lib/identity/auth"
 import { useToast } from "./ui/use-toast"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 
 export const signupFormSchema = z.object({
   name: z
@@ -111,162 +112,123 @@ export default function RegisterComponent() {
         className="mx-auto grid w-[350px] gap-6 z-10"
         onMouseEnter={() => setButtonHover(true)}
         onMouseLeave={() => setButtonHover(false)}>
-        <div className="w-full lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px] gradient">
-          <div className="flex items-center justify-center py-12">
-            <div className="mx-auto grid w-[350px] gap-6">
-              <div className="grid gap-2 text-center">
-                <h1 className="text-3xl font-bold">
-                  Pretorian System Security
-                </h1>
-                <p className="text-balance text-muted-foreground">
-                  S'inscrire pour continuer
-                </p>
-              </div>
-              <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-8">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nom</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Votre nom..." {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="surname"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Prénom</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Votre prénom..." {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="email"
-                            autoComplete="username"
-                            placeholder="Votre email..."
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Mot de passe</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="password"
-                            autoComplete="new-password"
-                            placeholder="Votre mot de passe..."
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  {/* <FormField
-                                control={form.control}
-                                name="confirmPassword"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>
-                                            Confirmez votre mot de passe
-                                        </FormLabel>
-                                        <FormControl>
-                                            <Input type="password" autoComplete="new-password" placeholder="Confirmez votre mot de passe..." {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="country"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>
-                                            Sélectionnez votre pays
-                                        </FormLabel>
-                                        <FormControl>
-                                            <Select onValueChange={field.onChange} defaultValue={field?.value}>
-                                                <SelectTrigger className="w-[180px]">
-                                                    <SelectValue placeholder="Pays" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {langageList.map((langage) => (
-                                                        <SelectItem key={langage.id} value={langage.code}>
-                                                            {langage.emoji} - {langage.pays}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="postalCode"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>
-                                            Code postal
-                                        </FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Code postal..." {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="city"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>
-                                            Ville
-                                        </FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Ville..." {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            /> */}
-
-                  <Button type="submit" disabled={loading}>
-                    {loading ? "Chargement..." : "S'inscrire"}
-                  </Button>
-                </form>
-              </Form>
-            </div>
-          </div>
+        <div className="grid gap-2 text-center">
+          <BlurIn
+            text="Pro Pretorian System Solution"
+            balise="h1"
+            className={`text-3xl font-bold bg-gradient-to-r from-indigo-500 via-yellow-500 to-indigo-500 inline-block text-transparent bg-clip-text`}
+          />
+          <BlurIn
+            text="Inscrivez-vous pour continuer"
+            balise="h3"
+            className={`text-sm font-bold bg-gradient-to-r from-gray-500 via-gray-200 to-gray-500 inline-block text-transparent bg-clip-text`}
+          />
+        </div>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-6 z-10">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-indigo-500">
+                    <BlurIn text="Nom" balise="span" className="text-sm" />
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Votre nom..."
+                      className="text-indigo-500"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="surname"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-indigo-500">
+                    <BlurIn text="Prénom" balise="span" className="text-sm" />
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Votre prénom..."
+                      className="text-indigo-500"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-indigo-500">
+                    <BlurIn text="Email" balise="span" className="text-sm" />
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      autoComplete="username"
+                      placeholder="Votre email..."
+                      className="text-indigo-500"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-indigo-500">
+                    <BlurIn
+                      text="Mot de passe"
+                      balise="span"
+                      className="text-sm"
+                    />
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      autoComplete="new-password"
+                      placeholder="Votre mot de passe..."
+                      className="text-indigo-500"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full animate-shimmer bg-gradient">
+              <BlurIn
+                text={loading ? "Chargement..." : "S'inscrire"}
+                balise="span"
+                className="text-sm"
+              />
+            </Button>
+          </form>
+        </Form>
+        <div className={`mt-4 text-center text-sm z-10 text-indigo-500`}>
+          <BlurIn text="Vous avez déjà un compte ?" balise="span" />
+          <Link href="/login" className="underline ml-1 border">
+            <BlurIn text="Connectez-vous" balise="span" className="text-sm" />
+          </Link>
         </div>
       </div>
     </AuroraBackground>
