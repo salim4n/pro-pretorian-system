@@ -25,6 +25,7 @@ jobs:
       - name: npm install and npm run build
         run: |
           npm install --force
+          rm -rf .next  # Clean the .next directory
           npm run build
 
       - name: Copy static files
