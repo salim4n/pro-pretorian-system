@@ -14,6 +14,7 @@ import MultipleSelector, { Option } from "./ui/multiple-select"
 import useModelDetectionStorage from "@/hooks/use-model-detection-storage"
 import { useEffect, useState } from "react"
 import { Label } from "./ui/label"
+import { usePathname } from "next/navigation"
 
 export default function ModelSelection() {
   const { modelName, setModel, disposeModel } = useModelStore()
@@ -21,6 +22,7 @@ export default function ModelSelection() {
   const { labelsToDetect, setLabelsToDetect } = useModelDetectionStorage({
     modelName,
   })
+  const pathname = usePathname()
 
   useEffect(() => {
     if (modelName === ModelComputerVision.EMPTY) {
@@ -83,32 +85,34 @@ export default function ModelSelection() {
           Réinitialiser
         </Button>
       </CardContent>
-      <CardContent className="p-6">
-        <Label>Labels à détecter</Label>
-        <MultipleSelector
-          disabled={!modelName}
-          options={options && options}
-          value={getDefaultValue()}
-          className=" bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm "
-          emptyIndicator={
-            <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">
-              Aucun label à détecter
-            </p>
-          }
-          onChange={(selectedOptions: Option[]) => {
-            const labels = labelsToDetect.map(label => {
-              return {
-                label: label.label,
-                toDetect: selectedOptions.some(
-                  selectedOption => selectedOption.value === label.label
-                ),
-              }
-            })
-            console.log("labels", labels)
-            setLabelsToDetect(labels)
-          }}
-        />
-      </CardContent>
+      {!pathname.includes("video-inference") && (
+        <CardContent className="p-6">
+          <Label>Labels à détecter</Label>
+          <MultipleSelector
+            disabled={!modelName}
+            options={options && options}
+            value={getDefaultValue()}
+            className=" bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm "
+            emptyIndicator={
+              <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">
+                Aucun label à détecter
+              </p>
+            }
+            onChange={(selectedOptions: Option[]) => {
+              const labels = labelsToDetect.map(label => {
+                return {
+                  label: label.label,
+                  toDetect: selectedOptions.some(
+                    selectedOption => selectedOption.value === label.label
+                  ),
+                }
+              })
+              console.log("labels", labels)
+              setLabelsToDetect(labels)
+            }}
+          />
+        </CardContent>
+      )}
     </Card>
   )
 }

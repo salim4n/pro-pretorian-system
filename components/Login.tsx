@@ -75,6 +75,18 @@ export default function Login() {
             balise="h3"
             className={`text-sm font-bold bg-gradient-to-r from-gray-500 via-gray-200 to-gray-500 inline-block text-transparent bg-clip-text`}
           />
+          <button
+            onClick={() => router.push("/video-inference")}
+            className="relative inline-flex h-8 overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50 z-10">
+            <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
+            <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full  px-2 py-1 text-sm font-medium text-white backdrop-blur-3xl">
+              <BlurIn
+                text="Tester sans connexion"
+                balise="h1"
+                className={` font-bold  bg-gradient-to-r from-gray-500 via-gray-200 to-gray-500 inline-block text-transparent bg-clip-text z-10`}
+              />{" "}
+            </span>
+          </button>
         </div>
         <Form {...form}>
           <form

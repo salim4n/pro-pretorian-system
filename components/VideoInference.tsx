@@ -14,11 +14,7 @@ import drawBoundingBoxes from "@/lib/model-detection/coco-ssd/utils"
 import useYolodisTfjs from "@/hooks/use-yolo-tfjs"
 import { detectVideo } from "@/lib/yolov8n/detect"
 
-interface IProps {
-  user: UserView
-}
-
-export default function VideoInference({ user }: IProps) {
+export default function VideoInference() {
   const { modelName } = useModelStore()
   const ready = useTfjsBackendWeb({ backend: "webgl" })
   const { cocoSsd, loadCoco } = useCocoSsd({ ready })
