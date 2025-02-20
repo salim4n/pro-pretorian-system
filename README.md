@@ -25,7 +25,6 @@ Installation
 Clone the repository:
 
 ```bash
-Copier le code
 git clone <https://github.com/your-username/your-repo-name.git>
 cd your-repo-name
 ```
@@ -33,14 +32,12 @@ cd your-repo-name
 Install dependencies:
 
 ```bash
-Copier le code
 npm install
 ```
 
 Run the application:
 
 ```bash
-Copier le code
 npm start
 ```
 
@@ -56,7 +53,6 @@ Configuration
 Telegram Integration: To receive notifications via Telegram, you need to set up a bot and get your bot token and chat ID. Configure these in the .env file.
 
 ```bash
-Copier le code
 TELEGRAM_BOT_TOKEN=your_bot_token
 TELEGRAM_CHAT_ID=your_chat_id
 ```
