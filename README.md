@@ -120,6 +120,6 @@ Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de
 Pour questions, suggestions ou contributions, n'hésitez pas à me contacter :
 
 **Salim4n**  
-Email : [votre.email@example.com](mailto:laimeche160@gmail.com)
+Email : [mon mail perso](mailto:laimeche160@gmail.com)
 
 
