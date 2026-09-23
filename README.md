@@ -1,5 +1,13 @@
 # 🎥 Pro-Pretorian System - Vision Informatique en Temps Réel
 
+## Refonte Pretorian v2 — dossier de conception
+
+**La direction v2, consolidée le 23 septembre 2026, est documentée dans [docs/pretorian-v2/README.md](docs/pretorian-v2/README.md).**
+
+Le dossier couvre les décisions, l'architecture SaaS/cloud/edge, le moteur Rust-native CPU-first, Tract/Candle/Burn, les modèles Hugging Face candidats, Qwen externalisé, les benchmarks et le plan de réalisation.
+
+**Il s'agit d'une spécification, pas d'une v2 déjà implémentée. Le reste de ce README décrit la version historique v1, notamment TensorFlow.js dans le navigateur.**
+
 ## Présentation
 
 Ce projet démontre la puissance de la vision par ordinateur directement dans le navigateur grâce à TensorFlow.js et WebGL. En exploitant les modèles YOLO et COCO-SSD pour la détection d'objets, l'exécution se fait en temps réel côté client, ce qui permet de réduire drastiquement les coûts serveur en limitant les appels API aux seuls moments où une détection est effective.
@@ -107,7 +115,7 @@ Nous invitons la communauté à contribuer activement à ce projet ! Voici ce qu
   Apportez vos idées et compétences pour repenser et affiner le design de l'application, afin de la rendre plus intuitive et esthétiquement irréprochable.
 
 - **Testeurs et contributeurs généraux :**  
-  Vos retours et suggestions sont précieux pour améliorer la stabilité, la performance et la convivialité du projet.
+  Vos retours et suggestions sont précieux pour l'amélioration de la stabilité, la performance et la convivialité de l'application.
 
 > **Astuce :** Pour toute modification majeure, merci de créer une issue afin de discuter ensemble des changements envisagés.
 
